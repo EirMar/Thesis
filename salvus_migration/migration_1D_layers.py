@@ -36,10 +36,10 @@ layered_model = ut.get_layers(
 # CREATE NEW SALVUS PROJECT
 # ------------------------------------------------------------------------------
 # !rm -rf salvus_project
+# This line should not be here!
 vm = sn.model.volume.cartesian.GenericModel(
     name="layered_model", data=layered_model)
 p = sn.Project.from_volume_model(path="salvus_project", volume_model=vm)
-
 
 # %%
 # ------------------------------------------------------------------------------
