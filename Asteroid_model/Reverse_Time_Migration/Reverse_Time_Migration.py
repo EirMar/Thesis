@@ -60,6 +60,51 @@ def my_model():
 
 true_model = my_model()
 
+# Define the meshgrid
+
+wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)
+mesh_frequency =  wavelet.center_frequency
+
+num_absorbing_layers = 10
+absorbing_side_sets = ["x0", "x1", "y0", "y1"]
+
+# Create a mesh from xarray Dataset
+mesh = toolbox.mesh_from_xarray(
+    model_order=4,
+    data=true_model,
+    slowest_velocity="vp",
+    maximum_frequency=mesh_frequency,
+    elements_per_wavelength=1.5,
+    absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
+
+# Smooth the model
+
+mesh.write_h5("true_model.h5")
+
+import salvus.namespace as sn
+from salvus.opt import smoothing
+
+smoothing_config = sn.ModelDependentSmoothing(
+ smoothing_lengths_in_wavelengths={
+ "VP": 2.0,
+ "RHO": 2.0
+ },
+ reference_frequency_in_hertz= 20,
+ reference_model="true_model.h5",
+ reference_velocities={"VP": "VP", "RHO": "RHO"},
+ ).get_smoothing_config()
+
+smooth_model = smoothing.run(
+    site_name="eejit",
+    ranks_per_job=48,
+    model=mesh,
+    smoothing_config=smoothing_config,
+    wall_time_in_seconds_per_job=10000
+)
+
+
+smooth_model
+
 
 # ------------------------------------------------------------------------------
 # CREATE NEW SALVUS PROJECT
