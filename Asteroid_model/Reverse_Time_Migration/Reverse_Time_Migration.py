@@ -282,4 +282,16 @@ gradient
 
 # %%
 
+synthetic_data = p.waveforms.get(
+    data_name="smooth_model", events=p.events.get_all()
+)
+
+synthetic_data[0].plot(component="A", receiver_field="phi")
+
+p.viz.nb.waveforms(
+    ["target_model", "smooth_model"], receiver_field="phi"
+)
+
+
+
 # %%
