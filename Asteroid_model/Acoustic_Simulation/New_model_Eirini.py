@@ -18,7 +18,7 @@ import time
 
 import xarray as xr
 
-from pathlib import Path 
+from pathlib import Path
 import pathlib
 
 import salvus.namespace as sn
@@ -51,7 +51,7 @@ dt = np.dtype([('time', '<u2'),('time1', '<u2'),('time2', np.float32),('time3', 
 
 data = np.fromfile(file, dtype=np.float32, count=-1, sep='', offset=0)
 
-my_array_rel_perm=data.reshape(3000,3000) 
+my_array_rel_perm=data.reshape(3000,3000)
 
 #print( my_array_rel_perm)
 
@@ -85,10 +85,10 @@ def my_model():
     x = np.linspace(-4000, +4000, nx)
     y = np.linspace(-4000, +4000, nx)
     xx, yy = np.meshgrid(x, y, indexing = "ij")
-    
+
     #put the array elements into the appropriate part of the model xarray structure
     ds = xr.Dataset ( data_vars= {"vp": (["x", "y"], my_array_rel_perm),  "rho": (["x", "y"], my_array_rho),}, coords={"x": x, "y": y},)
-    
+
     #Transform velocity to SI units (m/s).
     ds['vp'] *=10000
 
@@ -138,7 +138,7 @@ print(test_Nyquist)
 # In[10]:
 
 
-# Ricker wavelet 
+# Ricker wavelet
 
 wavelet = config.stf.Ricker(center_frequency=10.0)
 f, ax = plt.subplots(1, 2, figsize=(12, 4))
@@ -185,7 +185,7 @@ mesh_frequency =  wavelet.center_frequency
 
 
 # Sources
-srcs = sn.simple_config.source.cartesian.ScalarPoint2D( 
+srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
     source_time_function=wavelet, x=-100.0, y=3500.0, f=1)
 
 
@@ -194,7 +194,7 @@ recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
         x=0, y=0, radius=3500, count=380, fields=["phi"]
 )
 
-    
+
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 
@@ -346,84 +346,6 @@ p.viz.nb.waveforms(
 true_data[0].plot(component="A", receiver_field="phi")
 
 
-# ## Reverse Time Migration
+# Obtain the Snapshots
 
-# ### Initial model
-
-# In[28]:
-
-
-mesh.write_h5("true_model_new.h5")
-
-import salvus.namespace as sn
-from salvus.opt import smoothing
-config = sn.ConstantSmoothing(
-    smoothing_lengths_in_meters={
-  2250,
-  1000
-}
-).get_smoothing_config()
-
-smooth_model = smoothing.run(
-    site_name="eejit",
-    ranks_per_job=1,
-    model=true_model_new,
-    smoothing_config=config,
-    verbosity=0
-)
-
-
-# In[32]:
-
-
-mesh.write_h5("true_data.h5")
-
-
-import salvus.namespace as sn
-from salvus.opt import smoothing
-
-smooth_model = sn.ModelDependentSmoothing(
- smoothing_lengths_in_wavelengths={
-  2250,
-  1000,
- },
- reference_frequency_in_hertz=15,
- reference_model="true_data.h5",
- reference_velocities={"VP": "VP", "RHO": "VP"},
- )
-
-
-
-# In[ ]:
-
-
-# Simulation Configuration
-p += sn.SimulationConfiguration(
-    name="initial_model",
-    elements_per_wavelength=2,
-    tensor_order=2,
-    max_frequency_in_hertz=1000.0,
-    model_configuration=sn.ModelConfiguration(
-        background_model=None, volume_models="true_model_2"),
-    absorbing_boundaries=absorbing_par,
-    event_configuration=ec)
-
-p += sn.SimulationConfiguration(
-    name="target_model",
-    elements_per_wavelength=2,
-    tensor_order=2,
-    max_frequency_in_hertz=1000.0,
-    model_configuration=sn.ModelConfiguration(background_model="true_data"),
-    absorbing_boundaries=absorbing_par,
-    event_configuration=sn.EventConfiguration(
-        waveform_simulation_configuration=wsc,
-        wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)))
-
-p.simulations.get_mesh("initial_model")
-
-
-# In[ ]:
-
-
-
-
+p.simulations.get_simulation_output_directory(simulation_configuration="true_model_new", event=p.events.list()[0])
