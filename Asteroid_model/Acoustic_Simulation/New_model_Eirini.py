@@ -92,7 +92,6 @@ else:
 
 # stf
 wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
-# f_max = wavelet.center_frequency
 
 # Sources
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
@@ -104,12 +103,7 @@ recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
 
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
-
-# %%
-
-
 # Boundaries Conditions
-
 num_absorbing_layers = 10
 absorbing_side_sets = ["x0", "x1", "y0", "y1"]
 
@@ -124,70 +118,26 @@ mesh = toolbox.mesh_from_xarray(
 
 
 # %%
-
-
-# Visualize mesh
-mesh
-
-
-# ## Start Simulation
-
-# %%
-
-
+# salvus simulation object
 sim = config.simulation.Waveform(mesh=mesh, sources=srcs, receivers=recs)
-
-
-# ## Create Snapshots
-
-# %%
-
-
-#sim.output.point_data.format = "hdf5"
-
-
-# %%
-
-
-# Save the volumetric wavefield for visualization purposes.
-#sim.output.volume_data.format = "hdf5"
-#sim.output.volume_data.filename = "output.h5"
-#sim.output.volume_data.fields = ["phi"]
-#sim.output.volume_data.sampling_interval_in_time_steps = 10
-
-
-# %%
-
-
+# # Save the volumetric wavefield for visualization purposes.
+# sim.output.volume_data.format = "hdf5"
+# sim.output.volume_data.filename = "output.h5"
+# sim.output.volume_data.fields = ["phi"]
+# sim.output.volume_data.sampling_interval_in_time_steps = 10
 sim.validate()
+mesh        # Visualize mesh
 
 
 # %%
-
-
-# Visualize Simulation
-
-sim
-
-
-# %%
-
-
-# Waveform Simulation Configuration
-wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=6.0)
-
-
-# %%
-
-
 # Event Configuration
 ec = sn.EventConfiguration(
-    waveform_simulation_configuration=wsc,
+    waveform_simulation_configuration=sn.WaveformSimulationConfiguration(
+        end_time_in_seconds=6.0),
     wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0),
 )
 
 # Simulation Configuration
-
 p += sn.SimulationConfiguration(
     name="true_model_new",
     elements_per_wavelength=1.5,
@@ -202,8 +152,7 @@ p += sn.SimulationConfiguration(
 
 
 # %%
-
-
+# Modeling
 p.simulations.launch(
     simulation_configuration="true_model_new",
     events=p.events.get_all(),
@@ -219,28 +168,20 @@ p.simulations.launch(
 
 
 # %%
-
-
 p.simulations.query(block=True)
 
 
 # %%
-
-
 p.simulations.get_mesh("true_model_new")
 
 
 # %%
-
-
 true_data = p.waveforms.get(
     data_name="true_model_new", events=p.events.get_all()
 )
 
 
 # %%
-
-
 p.viz.nb.waveforms(
     data=["true_model_new"],
     receiver_field="phi",
@@ -248,12 +189,8 @@ p.viz.nb.waveforms(
 
 
 # %%
-
-
 true_data[0].plot(component="A", receiver_field="phi")
 
-
 # Obtain the Snapshots
-
 p.simulations.get_simulation_output_directory(
     simulation_configuration="true_model_new", event=p.events.list()[0])
