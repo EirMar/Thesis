@@ -92,7 +92,7 @@ else:
 
 # stf
 wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
-mesh_frequency = wavelet.center_frequency
+# f_max = wavelet.center_frequency
 
 # Sources
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
@@ -118,7 +118,7 @@ mesh = toolbox.mesh_from_xarray(
     model_order=4,
     data=true_model,
     slowest_velocity="vp",
-    maximum_frequency=mesh_frequency,
+    maximum_frequency=f_max,
     elements_per_wavelength=1.5,
     absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
 
@@ -192,7 +192,7 @@ p += sn.SimulationConfiguration(
     name="true_model_new",
     elements_per_wavelength=1.5,
     tensor_order=4,
-    max_frequency_in_hertz=mesh_frequency,
+    max_frequency_in_hertz=f_max,
     model_configuration=sn.ModelConfiguration(
         background_model=None, volume_models="true_model_2"
     ),
