@@ -16,18 +16,15 @@ import salvus.namespace as sn
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
-rho = 1000      # Density, rho = 1000 kg/m**3
+# Parameters
+rho = 1000              # Density, rho = 1000 kg/m**3
+nx, ny = 3000, 3000     # Model size
 
 data = np.fromfile(file="vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
-vp_asteroid = data.reshape(3000, 3000)
-# Density model
-rho_asteroid = np.full((3000, 3000), rho, dtype=int)
-# print(rho_asteroid)
 
-
-# %%
-
+vp_asteroid = data.reshape(nx, ny)                  # Velocity model
+rho_asteroid = np.full((ny, ny), rho, dtype=int)    # Density model
 
 plt.imshow(np.rot90(vp_asteroid, 3))
 plt.title('Asteroid model')
