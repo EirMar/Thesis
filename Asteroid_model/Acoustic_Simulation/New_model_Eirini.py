@@ -3,6 +3,7 @@
 # %%
 import os
 import matplotlib.pyplot as plt
+from IPython import get_ipython
 import numpy as np
 import pathlib
 
@@ -76,10 +77,7 @@ plt.tight_layout()
 
 
 # %%
-
-
 # Create new Project
-
 get_ipython().system('rm -rf project')
 if pathlib.Path("project").exists():
     print("Opening existing project.")
@@ -91,10 +89,7 @@ else:
     )
     p = sn.Project.from_volume_model(path="project", volume_model=vm)
 
-
-# %%
-
-
+# stf
 wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
 mesh_frequency = wavelet.center_frequency
 
