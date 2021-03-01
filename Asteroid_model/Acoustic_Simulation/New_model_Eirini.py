@@ -23,8 +23,8 @@ vp_asteroid = data.reshape(3000, 3000)
 # %%
 # Make an array that has the same size as velocity
 # Density constant ~ 1000 kg/m**3
-my_array_rho = np.full((3000, 3000), 1000, dtype=int)
-# print(my_array_rho)
+rho_asteroid = np.full((3000, 3000), 1000, dtype=int)
+# print(rho_asteroid)
 
 
 # %%
@@ -49,7 +49,7 @@ def my_model():
 
     # put the array elements into the appropriate part of the model xarray structure
     ds = xr.Dataset(data_vars={"vp": (["x", "y"], vp_asteroid),  "rho": (
-        ["x", "y"], my_array_rho), }, coords={"x": x, "y": y},)
+        ["x", "y"], rho_asteroid), }, coords={"x": x, "y": y},)
 
     # Transform velocity to SI units (m/s).
     ds['vp'] *= 10000
