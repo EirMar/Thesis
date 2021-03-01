@@ -20,12 +20,20 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 # Parameters
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
+dt, dx = 0.02, 1        # Time step, space step
+nyquist = 1 / (2*dt)    # Nyquist
 
+# Load model
 data = np.fromfile(file="vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
 
 vp_asteroid = data.reshape(nx, ny)                  # Velocity model
 rho_asteroid = np.full((ny, ny), rho, dtype=int)    # Density model
+
+# Stability Test
+eps = vp_asteroid.min() * dt / dx
+print('Stability criterion = {}'.format(eps))
+print('Nyquist = {}'.format(nyquist))
 
 plt.imshow(np.rot90(vp_asteroid, 3))
 plt.title('Asteroid model')
@@ -48,34 +56,8 @@ plt.suptitle("Asteroid model")
 plt.show()
 
 
-# #### Stability Test
-
 # %%
-
-
-# Stability Test
-
-dt = 0.02
-dx = 1
-
-eps = vp_asteroid.min() * dt / dx
-
-print('Stability criterion =', eps)
-
-
-# %%
-
-
-test_Nyquist = 1 / (2*dt)
-
-print(test_Nyquist)
-
-
-# %%
-
-
 # Ricker wavelet
-
 wavelet = config.stf.Ricker(center_frequency=10.0)
 f, ax = plt.subplots(1, 2, figsize=(12, 4))
 
@@ -91,9 +73,6 @@ ax[0].grid()
 ax[1].grid()
 
 plt.tight_layout()
-
-plt.show()
-print(type(wavelet))
 
 
 # %%
