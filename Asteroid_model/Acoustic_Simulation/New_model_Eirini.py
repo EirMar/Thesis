@@ -13,11 +13,11 @@ import salvus.namespace as sn
 
 # Set Salvus site. Where to run the simulations
 # SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
-SALVUS_FLOW_SITE_NAME = os.environ.get('eejit', 'eejit')
+SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
-file = "vel1_copy.bin"
-data = np.fromfile(file, dtype=np.float32, count=-1, sep='', offset=0)
+data = np.fromfile(file="vel1_copy.bin", dtype=np.float32, count=-1,
+                   sep='', offset=0)
 my_array_rel_perm = data.reshape(3000, 3000)
 
 # %%
