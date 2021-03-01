@@ -11,6 +11,8 @@ from salvus.toolbox import toolbox
 from salvus.flow import simple_config as config
 import salvus.namespace as sn
 
+import Asteroid_model.Acoustic_Simulation.utils as ut
+
 # Set Salvus site. Where to run the simulations
 # SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
@@ -37,20 +39,20 @@ plt.show()
 # %%
 
 
-def my_model():
-    nx, nz = 3000, 3000
-    x = np.linspace(-4000, +4000, nx)
-    y = np.linspace(-4000, +4000, nx)
-    xx, yy = np.meshgrid(x, y, indexing="ij")
-
-    # put the array elements into the appropriate part of the model xarray structure
-    ds = xr.Dataset(data_vars={"vp": (["x", "y"], vp_asteroid),  "rho": (
-        ["x", "y"], rho_asteroid), }, coords={"x": x, "y": y},)
-
-    # Transform velocity to SI units (m/s).
-    ds['vp'] *= 10000
-
-    return ds
+# def my_model():
+#     nx, nz = 3000, 3000
+#     x = np.linspace(-4000, +4000, nx)
+#     y = np.linspace(-4000, +4000, nx)
+#     xx, yy = np.meshgrid(x, y, indexing="ij")
+#
+#     # put the array elements into the appropriate part of the model xarray structure
+#     ds = xr.Dataset(data_vars={"vp": (["x", "y"], vp_asteroid),  "rho": (
+#         ["x", "y"], rho_asteroid), }, coords={"x": x, "y": y},)
+#
+#     # Transform velocity to SI units (m/s).
+#     ds['vp'] *= 10000
+#
+#     return ds
 
 
 # %%
@@ -58,7 +60,7 @@ def my_model():
 
 # Plot the xarray dataset.
 
-true_model = my_model()
+true_model = ut.my_model(vp=vp_asteroid, rho=rho_asteroid, nx=nx, nz=ny)
 
 plt.figure(figsize=(16, 6))
 plt.subplot(121)
