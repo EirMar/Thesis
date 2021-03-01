@@ -18,7 +18,7 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 # %%
 data = np.fromfile(file="vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
-my_array_rel_perm = data.reshape(3000, 3000)
+vp_asteroid = data.reshape(3000, 3000)
 
 # %%
 # Make an array that has the same size as velocity
@@ -30,7 +30,7 @@ my_array_rho = np.full((3000, 3000), 1000, dtype=int)
 # %%
 
 
-plt.imshow(np.rot90(my_array_rel_perm, 3))
+plt.imshow(np.rot90(vp_asteroid, 3))
 plt.title('Asteroid model')
 plt.colorbar(orientation='vertical')
 plt.xlabel('x (m)')
@@ -48,7 +48,7 @@ def my_model():
     xx, yy = np.meshgrid(x, y, indexing="ij")
 
     # put the array elements into the appropriate part of the model xarray structure
-    ds = xr.Dataset(data_vars={"vp": (["x", "y"], my_array_rel_perm),  "rho": (
+    ds = xr.Dataset(data_vars={"vp": (["x", "y"], vp_asteroid),  "rho": (
         ["x", "y"], my_array_rho), }, coords={"x": x, "y": y},)
 
     # Transform velocity to SI units (m/s).
@@ -84,7 +84,7 @@ plt.show()
 dt = 0.02
 dx = 1
 
-eps = my_array_rel_perm.min() * dt / dx
+eps = vp_asteroid.min() * dt / dx
 
 print('Stability criterion =', eps)
 
