@@ -3,7 +3,6 @@
 # %%
 import os
 import matplotlib.pyplot as plt
-import xarray as xr
 import numpy as np
 import pathlib
 
@@ -37,29 +36,6 @@ plt.show()
 
 
 # %%
-
-
-# def my_model():
-#     nx, nz = 3000, 3000
-#     x = np.linspace(-4000, +4000, nx)
-#     y = np.linspace(-4000, +4000, nx)
-#     xx, yy = np.meshgrid(x, y, indexing="ij")
-#
-#     # put the array elements into the appropriate part of the model xarray structure
-#     ds = xr.Dataset(data_vars={"vp": (["x", "y"], vp_asteroid),  "rho": (
-#         ["x", "y"], rho_asteroid), }, coords={"x": x, "y": y},)
-#
-#     # Transform velocity to SI units (m/s).
-#     ds['vp'] *= 10000
-#
-#     return ds
-
-
-# %%
-
-
-# Plot the xarray dataset.
-
 true_model = ut.my_model(vp=vp_asteroid, rho=rho_asteroid, nx=nx, nz=ny)
 
 plt.figure(figsize=(16, 6))
