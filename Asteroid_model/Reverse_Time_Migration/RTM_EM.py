@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 get_ipython().run_line_magic('matplotlib', 'inline')
 get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
 
 
-# In[ ]:
+# In[2]:
 
 
 import os
@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 SALVUS_FLOW_SITE_NAME=os.environ.get('eejit','eejit')
 
 
-# In[ ]:
+# In[3]:
 
 
 #Import the model - Relative Permittivity values
@@ -58,7 +58,7 @@ array_rho = np.full((3000,3000),1000, dtype=int)
 array_mu = np.full((3000,3000),1, dtype=int)
 
 
-# In[ ]:
+# In[4]:
 
 
 import math
@@ -73,7 +73,7 @@ array_eps_rel_sqrt=np.sqrt(array_eps_rel)
 v_radar = c / (mu * array_eps_rel_sqrt)
 
 
-# In[ ]:
+# In[5]:
 
 
 def my_model():
@@ -83,13 +83,13 @@ def my_model():
     xx, yy = np.meshgrid(x, y, indexing = "ij")
     
     #put the array elements into the appropriate part of the model xarray structure
-    ds = xr.Dataset ( data_vars= {"vp": (["x", "y"], v_radar),  "rho": (["x", "y"], array_rho),}, coords={"x": x, "y": y},)
+    ds = xr.Dataset (data_vars= {"vp": (["x", "y"], v_radar),  "rho": (["x", "y"], array_rho),}, coords={"x": x, "y": y},)
     
     return ds
 true_model = my_model()
 
 
-# In[ ]:
+# In[6]:
 
 
 wavelet=sn.simple_config.stf.Ricker(center_frequency=15.0e6)
@@ -108,7 +108,7 @@ mesh = toolbox.mesh_from_xarray(
     absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
 
 
-# In[ ]:
+# In[7]:
 
 
 mesh.write_h5("true_model.h5")
@@ -121,9 +121,9 @@ smoothing_config = sn.ModelDependentSmoothing(
  "VP": 2.0,
  "RHO": 2.0
  },
- reference_frequency_in_hertz= 15.0,
+ reference_frequency_in_hertz= 15.0e6,
  reference_model="true_model.h5",
- reference_velocities={"VP": "VP", "RHO": "RHO"},
+ reference_velocities={"VP": "VP", "RHO": "VP"},
  ).get_smoothing_config()
 
 smooth_model = smoothing.run(
@@ -131,7 +131,7 @@ smooth_model = smoothing.run(
     ranks_per_job=4,
     model=mesh,
     smoothing_config=smoothing_config,
-    wall_time_in_seconds_per_job=1
+    wall_time_in_seconds_per_job=60
 )
 
  
@@ -139,7 +139,7 @@ smooth_model = smoothing.run(
 smooth_model
 
 
-# In[ ]:
+# In[8]:
 
 
 # ------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ vm = sn.model.volume.cartesian.GenericModel(
 p = sn.Project.from_volume_model(path="salvus_project_EM", volume_model=vm)
 
 
-# In[ ]:
+# In[9]:
 
 
 wavelet=sn.simple_config.stf.Ricker(center_frequency=15.0e6)
@@ -172,13 +172,13 @@ recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 
-# In[ ]:
+# In[10]:
 
 
 wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=9.5e-6)
 
 
-# In[ ]:
+# In[11]:
 
 
 ec = sn.EventConfiguration(
@@ -187,7 +187,7 @@ ec = sn.EventConfiguration(
 )
 
 
-# In[ ]:
+# In[12]:
 
 
 p += sn.UnstructuredMeshSimulationConfiguration(
@@ -201,17 +201,17 @@ p += sn.SimulationConfiguration(
     name="target_model",
     elements_per_wavelength=2,
     tensor_order=2,
-    max_frequency_in_hertz = 30.0,
+    max_frequency_in_hertz = 15.0e6,
     model_configuration=sn.ModelConfiguration(background_model=None, volume_models=["true_model"]),
     event_configuration=sn.EventConfiguration(
         waveform_simulation_configuration=wsc,
         wavelet=sn.simple_config.stf.Ricker(center_frequency=15.0e6)))
 
 
-# In[ ]:
+# In[14]:
 
 
-sim = config.simulation.Waveform (mesh=mesh,sources=sources,receivers=receivers)
+sim = config.simulation.Waveform (mesh=mesh,sources=srcs,receivers=recs)
 
 
 # In[ ]:
@@ -230,7 +230,7 @@ sim = config.simulation.Waveform (mesh=mesh,sources=sources,receivers=receivers)
 #sim.output.volume_data.sampling_interval_in_time_steps = 1000
 
 
-# In[ ]:
+# In[15]:
 
 
 # %%
@@ -247,7 +247,7 @@ for sim, store in zip(["smooth_model", "target_model"], [True, False]):
         ranks_per_job=4,
         verbosity=0,
         store_adjoint_checkpoints=True,
-        wall_time_in_seconds_per_job=1,)
+        wall_time_in_seconds_per_job=60,)
 
 # %%
 for sim in ["smooth_model", "target_model"]:
@@ -258,7 +258,7 @@ for sim in ["smooth_model", "target_model"]:
         block=True,)
 
 
-# In[ ]:
+# In[16]:
 
 
 # %%
@@ -279,7 +279,7 @@ p += sn.MisfitConfiguration(
     receiver_field="phi")
 
 
-# In[ ]:
+# In[17]:
 
 
 # Computed misfits before running adjoint simulation
@@ -292,7 +292,7 @@ while not misfits:
         events=p.events.list(),
         ranks_per_job=4,
         site_name="eejit",
-        wall_time_in_seconds_per_job=1,
+        wall_time_in_seconds_per_job=60,
         verbosity=2,
     )
     time.sleep(5.0)
@@ -300,7 +300,7 @@ while not misfits:
 print(misfits)
 
 
-# In[ ]:
+# In[18]:
 
 
 # %%
@@ -313,11 +313,11 @@ p.simulations.launch_adjoint(
     events=p.events.list(),
     site_name="eejit",
     ranks_per_job=4,
-    wall_time_in_seconds_per_job=1,
+    wall_time_in_seconds_per_job=60,
     verbosity=True,)
 
 
-# In[ ]:
+# In[19]:
 
 
 # %%
@@ -330,7 +330,7 @@ p.simulations.query(
     block=True,)
 
 
-# In[ ]:
+# In[20]:
 
 
 # %%
@@ -340,9 +340,15 @@ gradient = p.actions.inversion.sum_gradients(
     events=p.events.list(),)
 
 
-# In[ ]:
+# In[21]:
 
 
 # gradient.write_h5("tot_gradient/gradient.h5")
 gradient
+
+
+# In[ ]:
+
+
+
 
