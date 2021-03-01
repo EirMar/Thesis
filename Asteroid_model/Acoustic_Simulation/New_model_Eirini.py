@@ -23,6 +23,7 @@ rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
 nyquist = 1 / (2*dt)    # Nyquist
+f_max = 20              # Maximum frequency
 
 # Load model
 data = np.fromfile(file="vel1_copy.bin", dtype=np.float32, count=-1,
@@ -77,7 +78,7 @@ plt.tight_layout()
 
 
 # %%
-# Create new Project
+# Create new salvus Project
 get_ipython().system('rm -rf project')
 if pathlib.Path("project").exists():
     print("Opening existing project.")
@@ -90,20 +91,16 @@ else:
     p = sn.Project.from_volume_model(path="project", volume_model=vm)
 
 # stf
-wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
+wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
 mesh_frequency = wavelet.center_frequency
-
 
 # Sources
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
     source_time_function=wavelet, x=-100.0, y=3500.0, f=1)
 
-
 # Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
-    x=0, y=0, radius=3500, count=380, fields=["phi"]
-)
-
+    x=0, y=0, radius=3500, count=380, fields=["phi"])
 
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
