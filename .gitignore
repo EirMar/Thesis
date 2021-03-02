@@ -130,3 +130,6 @@ dmypy.json
 
 # MacOS folder metadata and attributes
 **/.DS_Store
+
+# Salvus projects
+**/project*/

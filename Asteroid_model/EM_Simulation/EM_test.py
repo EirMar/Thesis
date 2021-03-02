@@ -1,149 +1,59 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[2]:
-
-
-get_ipython().run_line_magic('matplotlib', 'inline')
-get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
-
-
-# In[ ]:
-
-
+# %%
 import os
-import numpy as np
-
-import xarray as xr
-
-from pathlib import Path 
-import salvus.namespace as sn
-from salvus.flow import simple_config as config
-
-import salvus.mesh.unstructured_mesh as um
-import salvus.mesh.structured_grid_2D as sg2d
-
-import salvus.namespace as sn
-
 import matplotlib.pyplot as plt
+from IPython import get_ipython
+import numpy as np
+import pathlib
 
-SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
+from salvus.toolbox import toolbox
+from salvus.flow import simple_config as config
+import salvus.namespace as sn
 
+from utils import my_model
 
-# In[ ]:
+SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
+# %%
+# Parameters
+c = 3e8                 # speed of light
+mu = 1                  #
+rho = 1000              # Density, rho = 1000 kg/m**3
+nx, ny = 3000, 3000     # Model size
+f_max = 15.0e6          # Maximum frequency
 
-#Import the model - Relative Permittivity values
+# Import the model - Relative Permittivity values
+data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
+                   sep='', offset=0)
 
-file = "vel1_copy.bin"
+eps_asteroid = data.reshape(nx, ny)                 # Velocity model
+rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
+mu_asteroid = np.full((nx, ny), 1, dtype=int)       # Magnetic Permeability
+v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
 
-dt = np.dtype([('time', '<u2'),('time1', '<u2'),('time2', np.float32),('time3', np.float32)])
-
-data = np.fromfile(file, dtype=np.float32, count=-1, sep='', offset=0)
-
-array_eps_rel = data.reshape (3000,3000) 
-
-print(array_eps_rel)
-#print(my_array_eps_rel[1500,1500])
-#print(my_array_eps_rel[2999,2999])
-#print(my_array_eps_rel[1700,1700])
-#print(data)
-#type(data)
-
-
-# In[5]:
-
-
-#Density
-array_rho = np.full((3000,3000),1000, dtype=int)
-print(array_rho)
-
-
-# In[6]:
-
-
-#Magnetic Permeability
-array_mu = np.full((3000,3000),1, dtype=int)
-print(array_mu)
-
-
-# In[7]:
-
-
-import math
-
-c = 3e8 #speed of light
-mu = 1
-#v_radar = c / math.sqrt(mu * array_eps_rel)
-
-array_eps_rel_sqrt=np.sqrt(array_eps_rel)
-print(array_eps_rel_sqrt)
-
-v_radar = c / (mu * array_eps_rel_sqrt)
-print(v_radar)
-
-#or
-
-#v_radar_1 = np.divide(c, array_eps_rel_sqrt) 
-#print(v_radar_1)
-
-
-# In[8]:
-
-
-plt.imshow(np.rot90(v_radar,3))
+plt.imshow(np.rot90(v_radar, 3))
 plt.title('Asteroid model')
 plt.colorbar(orientation='vertical')
 plt.xlabel('x (m)')
 plt.ylabel('y (m)')
-
-#plt.figure(figsize=(16, 6))
-
-#plt.subplot(121)
-#true_model.vp.T.plot()
-#plt.subplot(122)
-#true_model.rho.T.plot()
-
 plt.show()
 
 
-# In[9]:
+# %%
+true_model = my_model(vp=v_radar, rho=rho_asteroid, nx=nx, nz=ny)
 
-
-def my_model():
-    nx, nz = 3000, 3000
-    x = np.linspace(-500, +500, nx)
-    y = np.linspace(-500, +500, nx)
-    xx, yy = np.meshgrid(x, y, indexing = "ij")
-    
-    #put the array elements into the appropriate part of the model xarray structure
-    ds = xr.Dataset ( data_vars= {"vp": (["x", "y"], v_radar),  "rho": (["x", "y"], array_rho),}, coords={"x": x, "y": y},)
-    
-    #ds['vp'] *=10e9 #10e9
-    return ds
-
-
-# In[10]:
-
-
-true_model = my_model()
-
-# Plot the xarray dataset.
 plt.figure(figsize=(16, 6))
-
 plt.subplot(121)
+plt.title("Asteroid model")
 true_model.vp.T.plot()
-plt.xlabel("x (m)")
-plt.ylabel("y (m)")
-
+plt.subplot(122)
+true_model.rho.T.plot()
 plt.suptitle("Asteroid model")
 plt.show()
 
 
-# In[11]:
-
-
-import pathlib
+# %%
 get_ipython().system('rm -rf project')
 if pathlib.Path("project").exists():
     print("Opening existing project.")
@@ -155,28 +65,20 @@ else:
     )
     p = sn.Project.from_volume_model(path="project", volume_model=vm)
 
+# stf
+wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
 
-# In[12]:
+# Sources
+srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
+    source_time_function=wavelet, x=0.0, y=450.0, f=1)
 
-
-wavelet=sn.simple_config.stf.Ricker(center_frequency=15.0e6)
-mesh_frequency = wavelet.center_frequency
-
-srcs = sn.simple_config.source.cartesian.ScalarPoint2D( 
-     source_time_function=wavelet, x=0.0, y=450.0, f=1)
-
-
+# Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
-       x=0, y=0, radius=450, count=380, fields=["phi"])
-    
+    x=0, y=0, radius=450, count=380, fields=["phi"])
+
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
-
-# In[13]:
-
-
-from salvus.toolbox import toolbox
-
+# Boundaries Conditions
 num_absorbing_layers = 10
 absorbing_side_sets = ["x0", "x1", "y0", "y1"]
 
@@ -184,51 +86,27 @@ mesh = toolbox.mesh_from_xarray(
     model_order=4,
     data=true_model,
     slowest_velocity='vp',
-    maximum_frequency=mesh_frequency,
+    maximum_frequency=f_max,
     elements_per_wavelength=2,
-    absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers)) 
+    absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
 
 
-# In[14]:
-
-
-mesh
-
-
-# In[15]:
-
-
-sim = config.simulation.Waveform (mesh=mesh,sources=srcs,receivers=recs)
-
-
-# In[16]:
-
-
-sim
-
-
-# In[17]:
-
-
-#wsc = sn.WaveformSimulationConfiguration(start_time_in_seconds=1e-9)
+# %%
+# salvus simulation object
+sim = config.simulation.Waveform(mesh=mesh, sources=srcs, receivers=recs)
 wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=9.5e-6)
 wsc.physics.wave_equation.time_step_in_seconds = 1.0e-10
-
-
-# In[18]:
-
 
 ec = sn.EventConfiguration(
     waveform_simulation_configuration=wsc,
     wavelet=sn.simple_config.stf.Ricker(center_frequency=20.0e6),
 )
 
-
 p += sn.SimulationConfiguration(
     name="true_model_new_EM",
     elements_per_wavelength=1.5,
     tensor_order=4,
-    max_frequency_in_hertz=mesh_frequency,
+    max_frequency_in_hertz=f_max,
     model_configuration=sn.ModelConfiguration(
         background_model=None, volume_models="true_model_EM"
     ),
@@ -237,46 +115,31 @@ p += sn.SimulationConfiguration(
 )
 
 
-# In[19]:
-
-
+# %%
+# Modeling
 p.simulations.launch(
     simulation_configuration="true_model_new_EM",
     events=p.events.get_all(),
     site_name=SALVUS_FLOW_SITE_NAME,
-    ranks_per_job=1,
-
+    ranks_per_job=28,
+    wall_time_in_seconds_per_job=10,
 )
 
-
-# In[20]:
-
-
+# %%
 p.simulations.query(block=True)
 
 
-# In[21]:
-
-
+# %%
 p.simulations.get_mesh("true_model_new_EM")
 
 
-# In[22]:
-
-
+# %%
 true_data = p.waveforms.get(
     data_name="true_model_new_EM", events=p.events.get_all()
 )
 
 
-# In[23]:
-
-
+# %%
 true_data[0].plot(component="A", receiver_field="phi")
 
-
-# In[ ]:
-
-
-
-
+# %%
