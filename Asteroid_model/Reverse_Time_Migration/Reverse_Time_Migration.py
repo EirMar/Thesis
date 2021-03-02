@@ -73,14 +73,6 @@ ec = sn.EventConfiguration(
     waveform_simulation_configuration=wsc,
     wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0))
 
-# Simulation Configuration - UnstructuredMesh - smooth_model
-p += sn.UnstructuredMeshSimulationConfiguration(
-    name="smooth_model",
-    unstructured_mesh=smooth_model,
-    event_configuration=sn.EventConfiguration(
-        waveform_simulation_configuration=wsc,
-        wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)))
-
 # Simulation Configuration - Model - true_model
 p += sn.SimulationConfiguration(
     name="target_model",
