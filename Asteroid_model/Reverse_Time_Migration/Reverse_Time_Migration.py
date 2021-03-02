@@ -93,7 +93,17 @@ p += sn.SimulationConfiguration(
         waveform_simulation_configuration=wsc,
         wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)))
 
-
+# Constan velocity model
+homo_mesh = p.simulations.get_mesh("target_model")
+homo_mesh.element_nodal_fields["VP"].fill(vp_asteroid[0, 0])
+homo_mesh.element_nodal_fields["RHO"].fill(rho_asteroid[0, 0])
+p.add_to_project(
+    sn.UnstructuredMeshSimulationConfiguration(
+        name="direct_wave_sim",
+        unstructured_mesh=homo_mesh,
+        event_configuration=ec
+    )
+)
 # %%
 # ------------------------------------------------------------------------------
 # RUN FORWARD SIMULATION
