@@ -19,7 +19,7 @@ r_ring = 3500           # Satellite altitud
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
-f_max = 30              # Maximum frequency
+f_max = 20              # Maximum frequency
 
 # Load model
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -71,7 +71,7 @@ absorbing_par = sn.simple_mesh.basic_mesh.AbsorbingBoundaryParameters(
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 # Waveform Simulation Configuration
-wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=5.0)
+wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=6.0)
 
 # Event configuration
 ec = sn.EventConfiguration(
