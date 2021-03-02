@@ -105,7 +105,7 @@ for sim, store in zip(["target_model", "direct_wave_sim"], [True, False]):
         wall_time_in_seconds_per_job=1,)
 
 # %%
-for sim in ["smooth_model", "target_model"]:
+for sim in ["target_model", "direct_wave_sim"]:
     p.simulations.query(
         simulation_configuration=sim,
         events=p.events.list(),
