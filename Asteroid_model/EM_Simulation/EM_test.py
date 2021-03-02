@@ -21,6 +21,7 @@ c = 3e8                 # speed of light
 mu = 1                  #
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
+f_max = 20              # Maximum frequency
 
 # Import the model - Relative Permittivity values
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -64,12 +65,9 @@ else:
     )
     p = sn.Project.from_volume_model(path="project", volume_model=vm)
 
-
-# %%
-
-
+# stf
 wavelet = sn.simple_config.stf.Ricker(center_frequency=15.0e6)
-mesh_frequency = wavelet.center_frequency
+# mesh_frequency = wavelet.center_frequency
 
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
     source_time_function=wavelet, x=0.0, y=450.0, f=1)
@@ -91,7 +89,7 @@ mesh = toolbox.mesh_from_xarray(
     model_order=4,
     data=true_model,
     slowest_velocity='vp',
-    maximum_frequency=mesh_frequency,
+    maximum_frequency=f_max,
     elements_per_wavelength=2,
     absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
 
