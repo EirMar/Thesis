@@ -14,7 +14,6 @@ import salvus.namespace as sn
 from utils import my_model
 
 # Set Salvus site. Where to run the simulations
-# SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
