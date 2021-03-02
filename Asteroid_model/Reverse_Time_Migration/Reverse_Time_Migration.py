@@ -2,19 +2,13 @@
 # coding: utf-8
 # %%
 import os
-import matplotlib.pyplot as plt
 from IPython import get_ipython
 import numpy as np
-import pathlib
 import time
 
-from salvus.toolbox import toolbox
-from salvus.flow import simple_config as config
-from salvus.opt import smoothing
 import salvus.namespace as sn
-
-import utils as ut
 from models import my_model
+
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
