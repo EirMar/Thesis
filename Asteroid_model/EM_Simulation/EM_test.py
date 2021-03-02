@@ -67,12 +67,12 @@ else:
 
 # stf
 wavelet = sn.simple_config.stf.Ricker(center_frequency=15.0e6)
-# mesh_frequency = wavelet.center_frequency
 
+# Sources
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
     source_time_function=wavelet, x=0.0, y=450.0, f=1)
 
-
+# Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
     x=0, y=0, radius=450, count=380, fields=["phi"])
 
