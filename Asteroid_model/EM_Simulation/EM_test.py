@@ -18,11 +18,8 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'local')
 
 
 # Import the model - Relative Permittivity values
-
-file = "vel1_copy.bin"
-
-
-data = np.fromfile(file, dtype=np.float32, count=-1, sep='', offset=0)
+data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
+                   sep='', offset=0)
 
 array_eps_rel = data.reshape(3000, 3000)
 
