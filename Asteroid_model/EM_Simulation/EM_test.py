@@ -141,3 +141,5 @@ true_data = p.waveforms.get(
 
 # %%
 true_data[0].plot(component="A", receiver_field="phi")
+
+# %%
