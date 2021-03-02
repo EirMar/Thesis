@@ -52,20 +52,16 @@ vm = sn.model.volume.cartesian.GenericModel(
 p = sn.Project.from_volume_model(
     path="project_salvus", volume_model=vm)
 
-
+# stf
 wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
-mesh_frequency = wavelet.center_frequency
-
 
 # Sources
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
     source_time_function=wavelet, x=-100.0, y=3500.0, f=1)
 
-
 # Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
-    x=0, y=0, radius=3500, count=380, fields=["phi"]
-)
+    x=0, y=0, radius=3500, count=380, fields=["phi"])
 
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
