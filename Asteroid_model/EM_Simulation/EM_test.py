@@ -12,11 +12,8 @@ import salvus.namespace as sn
 from salvus.flow import simple_config as config
 from salvus.toolbox import toolbox
 
-
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'local')
 
-get_ipython().run_line_magic('matplotlib', 'inline')
-get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
 # %%
 
 
