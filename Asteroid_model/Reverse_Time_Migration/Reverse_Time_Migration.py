@@ -1,28 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[1]:
-
-
-# In[2]:
-
-
+# %%
 import os
-import numpy as np
-import time
-import xarray as xr
-from pathlib import Path
-import pathlib
-import salvus.namespace as sn
-from salvus.flow import simple_config as config
-import salvus.mesh.unstructured_mesh as um
-import salvus.mesh.structured_grid_2D as sg2d
-from salvus.flow import simple_config as config
-from salvus.toolbox import toolbox
-import salvus.namespace as sn
 import matplotlib.pyplot as plt
-import utils as ut
+from IPython import get_ipython
+import numpy as np
+import pathlib
+import time
+
+from salvus.toolbox import toolbox
+from salvus.flow import simple_config as config
 from salvus.opt import smoothing
+import salvus.namespace as sn
+
+import utils as ut
 
 
 # Variable used in the notebook to determine which site
@@ -49,7 +40,7 @@ def my_model():
     y = np.linspace(-4000, +4000, nx)
     xx, yy = np.meshgrid(x, y, indexing="ij")
 
-    # put the array elements into the appropriate part of the model xarray structure
+    # put the array elements into the appropriate part of the structure
     ds = xr.Dataset(data_vars={"vp": (["x", "y"], my_array_rel_perm),
                                "rho": (["x", "y"], my_array_rho), },
                     coords={"x": x, "y": y},)
