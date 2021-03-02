@@ -19,30 +19,23 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
 # Parameters
-c = 3e8                 # speed of light
-mu = 1                  #
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
-f_max = 15.0e6          # Maximum frequency
+dt, dx = 0.02, 1        # Time step, space step
+f_max = 20              # Maximum frequency
 
-# Import the model - Relative Permittivity values
+# Load model
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
 
-eps_asteroid = data.reshape(nx, ny)                 # Velocity model
+vp_asteroid = data.reshape(nx, ny)                  # Velocity model
 rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
-mu_asteroid = np.full((nx, ny), 1, dtype=int)       # Magnetic Permeability
-v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
 
-true_model = my_model(vp=v_radar, rho=rho_asteroid, nx=nx, nz=ny)
+true_model = my_model(vp=vp_asteroid, rho=rho_asteroid, nx=nx, nz=ny)
 true_model.vp.T.plot()
 
 # %%
-# Define the meshgrid
-
-wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
-mesh_frequency = wavelet.center_frequency
-
+# Boundaries Conditions
 num_absorbing_layers = 10
 absorbing_side_sets = ["x0", "x1", "y0", "y1"]
 
@@ -51,15 +44,12 @@ mesh = toolbox.mesh_from_xarray(
     model_order=4,
     data=true_model,
     slowest_velocity="vp",
-    maximum_frequency=mesh_frequency,
+    maximum_frequency=0.5*f_max,
     elements_per_wavelength=1.5,
     absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
 
 # Smooth the model
-
 mesh.write_h5("true_model.h5")
-
-
 smoothing_config = sn.ModelDependentSmoothing(
     smoothing_lengths_in_wavelengths={
         "VP": 2.0,
@@ -77,11 +67,10 @@ smooth_model = smoothing.run(
     smoothing_config=smoothing_config,
     wall_time_in_seconds_per_job=10000
 )
-
-
 smooth_model
 
 
+# %%
 # ------------------------------------------------------------------------------
 # CREATE NEW SALVUS PROJECT
 # ------------------------------------------------------------------------------
