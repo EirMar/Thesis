@@ -156,8 +156,8 @@ p.simulations.launch(
     simulation_configuration="true_model_new",
     events=p.events.get_all(),
     site_name=SALVUS_FLOW_SITE_NAME,
-    ranks_per_job=4,
-    wall_time_in_seconds_per_job=1,
+    ranks_per_job=28,
+    wall_time_in_seconds_per_job=10,
     extra_output_configuration={
         "volume_data": {
             "sampling_interval_in_time_steps": 10,
@@ -193,3 +193,5 @@ true_data[0].plot(component="A", receiver_field="phi")
 # Obtain the Snapshots
 p.simulations.get_simulation_output_directory(
     simulation_configuration="true_model_new", event=p.events.list()[0])
+
+# %%
