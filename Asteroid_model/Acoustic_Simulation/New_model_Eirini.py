@@ -11,7 +11,7 @@ from salvus.toolbox import toolbox
 from salvus.flow import simple_config as config
 import salvus.namespace as sn
 
-import Asteroid_model.Acoustic_Simulation.utils as ut
+from utils import my_model
 
 # Set Salvus site. Where to run the simulations
 # SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
@@ -26,7 +26,7 @@ nyquist = 1 / (2*dt)    # Nyquist
 f_max = 20              # Maximum frequency
 
 # Load model
-data = np.fromfile(file="vel1_copy.bin", dtype=np.float32, count=-1,
+data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
 
 vp_asteroid = data.reshape(nx, ny)                  # Velocity model
@@ -46,7 +46,7 @@ plt.show()
 
 
 # %%
-true_model = ut.my_model(vp=vp_asteroid, rho=rho_asteroid, nx=nx, nz=ny)
+true_model = my_model(vp=vp_asteroid, rho=rho_asteroid, nx=nx, nz=ny)
 
 plt.figure(figsize=(16, 6))
 plt.subplot(121)
