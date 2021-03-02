@@ -50,8 +50,8 @@ p = sn.Project.from_volume_model(
 wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
 
 # Sources
-srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
-    source_time_function=wavelet, x=-100.0, y=3500.0, f=1)
+srcs = sn.simple_config.source.cartesian.collections.ScalarPoint2DRing(
+    x=0, y=0, radius=3500, count=1, f=1.0)
 
 # Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
