@@ -1,24 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 # %%
-from salvus.toolbox import toolbox
-import pathlib
-import math
 import os
+import matplotlib.pyplot as plt
+from IPython import get_ipython
 import numpy as np
-
+import pathlib
 import xarray as xr
 
-from pathlib import Path
 import salvus.namespace as sn
 from salvus.flow import simple_config as config
+from salvus.toolbox import toolbox
 
-import salvus.mesh.unstructured_mesh as um
-import salvus.mesh.structured_grid_2D as sg2d
-
-import salvus.namespace as sn
-
-import matplotlib.pyplot as plt
 
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'local')
 
