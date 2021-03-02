@@ -125,7 +125,7 @@ def misfit_func(data_synthetic: np.ndarray,
 
 
 p += sn.MisfitConfiguration(
-    name="migration_1",
+    name="migration",
     observed_data="direct_wave_sim",
     misfit_function=misfit_func,
     receiver_field="phi")
@@ -135,7 +135,7 @@ misfits = None
 while not misfits:
     misfits = p.actions.inversion.compute_misfits(
         simulation_configuration="target_model",
-        misfit_configuration="migration_1",
+        misfit_configuration="migration",
         store_checkpoints=False,
         events=p.events.list(),
         ranks_per_job=48,
@@ -153,7 +153,7 @@ print(misfits)
 # ------------------------------------------------------------------------------
 p.simulations.launch_adjoint(
     simulation_configuration="target_model",
-    misfit_configuration="migration_1",
+    misfit_configuration="migration",
     events=p.events.list(),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=48,
@@ -164,7 +164,7 @@ p.simulations.launch_adjoint(
 p.simulations.query(
     simulation_configuration="target_model",
     events=p.events.list(),
-    misfit_configuration="migration_1",
+    misfit_configuration="migration",
     ping_interval_in_seconds=1.0,
     verbosity=2,
     block=True,)
@@ -172,7 +172,7 @@ p.simulations.query(
 # %%
 gradient = p.actions.inversion.sum_gradients(
     simulation_configuration="target_model",
-    misfit_configuration="migration_1",
+    misfit_configuration="migration",
     events=p.events.list(),)
 
 # gradient.write_h5("tot_gradient/gradient.h5")
@@ -262,3 +262,8 @@ p.viz.nb.waveforms(
 #     wall_time_in_seconds_per_job=10000
 # )
 # smooth_model
+
+# %%
+get_ipython().system('rm -rf project_salvus')
+
+# %%
