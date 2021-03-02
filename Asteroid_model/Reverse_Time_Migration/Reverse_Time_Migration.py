@@ -57,6 +57,14 @@ srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
     x=0, y=0, radius=3500, count=380, fields=["phi"])
 
+# BOUNDARIES
+vp_min = vp_asteroid.min()
+absorbing_par = sn.simple_mesh.basic_mesh.AbsorbingBoundaryParameters(
+    reference_velocity=vp_min,
+    number_of_wavelengths=6,
+    reference_frequency=0.5*f_max,
+    free_surface=False)
+
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 # Waveform Simulation Configuration
@@ -75,6 +83,7 @@ p += sn.SimulationConfiguration(
     max_frequency_in_hertz=f_max,
     model_configuration=sn.ModelConfiguration(
         background_model=None, volume_models=["true_model"]),
+    absorbing_boundaries=absorbing_par,
     event_configuration=sn.EventConfiguration(
         waveform_simulation_configuration=wsc,
         wavelet=wavelet))
