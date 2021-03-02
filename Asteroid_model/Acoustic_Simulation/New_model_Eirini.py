@@ -30,7 +30,7 @@ data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
 
 vp_asteroid = data.reshape(nx, ny)                  # Velocity model
-rho_asteroid = np.full((ny, ny), rho, dtype=int)    # Density model
+rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
 
 # Stability Test
 eps = vp_asteroid.min() * dt / dx
