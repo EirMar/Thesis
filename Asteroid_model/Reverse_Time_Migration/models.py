@@ -15,6 +15,6 @@ def my_model(vp, rho, nx, nz):
         ["x", "y"], rho), }, coords={"x": x, "y": y},)
 
     # Transform velocity to SI units (m/s).
-    # ds['vp'] *= 10000
+    ds['vp'] *= 10000
 
     return ds

@@ -100,7 +100,7 @@ for sim, store in zip(["target_model", "direct_wave_sim"], [True, False]):
         events=p.events.get_all(),
         site_name=SALVUS_FLOW_SITE_NAME,
         ranks_per_job=48,
-        verbosity=0,
+        verbosity=2,
         store_adjoint_checkpoints=True,
         wall_time_in_seconds_per_job=1,)
 
@@ -125,8 +125,8 @@ def misfit_func(data_synthetic: np.ndarray,
 
 
 p += sn.MisfitConfiguration(
-    name="migration",
-    observed_data="target_model",
+    name="migration_1",
+    observed_data="direct_wave_sim",
     misfit_function=misfit_func,
     receiver_field="phi")
 
@@ -134,8 +134,8 @@ p += sn.MisfitConfiguration(
 misfits = None
 while not misfits:
     misfits = p.actions.inversion.compute_misfits(
-        simulation_configuration="smooth_model",
-        misfit_configuration="migration",
+        simulation_configuration="target_model",
+        misfit_configuration="migration_1",
         store_checkpoints=False,
         events=p.events.list(),
         ranks_per_job=48,
@@ -152,8 +152,8 @@ print(misfits)
 # RUN ADJOINT SIMULATION
 # ------------------------------------------------------------------------------
 p.simulations.launch_adjoint(
-    simulation_configuration="smooth_model",
-    misfit_configuration="migration",
+    simulation_configuration="target_model",
+    misfit_configuration="migration_1",
     events=p.events.list(),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=48,
@@ -162,17 +162,17 @@ p.simulations.launch_adjoint(
 
 # %%
 p.simulations.query(
-    simulation_configuration="smooth_model",
+    simulation_configuration="target_model",
     events=p.events.list(),
-    misfit_configuration="migration",
+    misfit_configuration="migration_1",
     ping_interval_in_seconds=1.0,
     verbosity=2,
     block=True,)
 
 # %%
 gradient = p.actions.inversion.sum_gradients(
-    simulation_configuration="smooth_model",
-    misfit_configuration="migration",
+    simulation_configuration="target_model",
+    misfit_configuration="migration_1",
     events=p.events.list(),)
 
 # gradient.write_h5("tot_gradient/gradient.h5")
