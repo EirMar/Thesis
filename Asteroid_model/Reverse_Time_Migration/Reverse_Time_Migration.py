@@ -13,6 +13,9 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
 # Parameters
+ns = 20                 # Number of sources
+nr = 380                # Number of receivers
+r_ring = 3500           # Satellite altitud
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
@@ -51,11 +54,11 @@ wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
 
 # Sources
 srcs = sn.simple_config.source.cartesian.collections.ScalarPoint2DRing(
-    x=0, y=0, radius=3500, count=1, f=1.0)
+    x=0, y=0, radius=r_ring, count=ns, f=1.0)
 
 # Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
-    x=0, y=0, radius=3500, count=380, fields=["phi"])
+    x=0, y=0, radius=r_ring, count=nr, fields=["phi"])
 
 # BOUNDARIES
 vp_min = vp_asteroid.min()
