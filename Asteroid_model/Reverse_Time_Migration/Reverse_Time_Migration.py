@@ -4,10 +4,6 @@
 # In[1]:
 
 
-get_ipython().run_line_magic('matplotlib', 'inline')
-get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
-
-
 # In[2]:
 
 
@@ -31,41 +27,45 @@ from salvus.opt import smoothing
 
 # Variable used in the notebook to determine which site
 # is used to run the simulations.
-#SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
-SALVUS_FLOW_SITE_NAME=os.environ.get('eejit','eejit')
+# SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
+SALVUS_FLOW_SITE_NAME = os.environ.get('eejit', 'eejit')
 
 
 # Import the model
 file = "vel1_copy.bin"
-dt = np.dtype([('time', '<u2'),('time1', '<u2'),('time2', np.float32),('time3', np.float32)])
+dt = np.dtype([('time', '<u2'), ('time1', '<u2'),
+               ('time2', np.float32), ('time3', np.float32)])
 data = np.fromfile(file, dtype=np.float32, count=-1, sep='', offset=0)
 
-my_array_rel_perm=data.reshape(3000,3000)
-my_array_rho=np.full((3000,3000),1000, dtype=int)
+my_array_rel_perm = data.reshape(3000, 3000)
+my_array_rho = np.full((3000, 3000), 1000, dtype=int)
 
 # Define the model
+
+
 def my_model():
     nx, nz = 3000, 3000
     x = np.linspace(-4000, +4000, nx)
     y = np.linspace(-4000, +4000, nx)
-    xx, yy = np.meshgrid(x, y, indexing = "ij")
+    xx, yy = np.meshgrid(x, y, indexing="ij")
 
-    #put the array elements into the appropriate part of the model xarray structure
-    ds = xr.Dataset ( data_vars= {"vp": (["x", "y"], my_array_rel_perm),
-     "rho": (["x", "y"], my_array_rho),},
-     coords={"x": x, "y": y},)
+    # put the array elements into the appropriate part of the model xarray structure
+    ds = xr.Dataset(data_vars={"vp": (["x", "y"], my_array_rel_perm),
+                               "rho": (["x", "y"], my_array_rho), },
+                    coords={"x": x, "y": y},)
 
-    #Transform velocity to SI units (m/s).
-    ds['vp'] *=10000
+    # Transform velocity to SI units (m/s).
+    ds['vp'] *= 10000
 
     return ds
+
 
 true_model = my_model()
 
 # Define the meshgrid
 
-wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)
-mesh_frequency =  wavelet.center_frequency
+wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
+mesh_frequency = wavelet.center_frequency
 
 num_absorbing_layers = 10
 absorbing_side_sets = ["x0", "x1", "y0", "y1"]
@@ -83,18 +83,16 @@ mesh = toolbox.mesh_from_xarray(
 
 mesh.write_h5("true_model.h5")
 
-import salvus.namespace as sn
-from salvus.opt import smoothing
 
 smoothing_config = sn.ModelDependentSmoothing(
- smoothing_lengths_in_wavelengths={
- "VP": 2.0,
- "RHO": 2.0
- },
- reference_frequency_in_hertz= 20,
- reference_model="true_model.h5",
- reference_velocities={"VP": "VP", "RHO": "RHO"},
- ).get_smoothing_config()
+    smoothing_lengths_in_wavelengths={
+        "VP": 2.0,
+        "RHO": 2.0
+    },
+    reference_frequency_in_hertz=20,
+    reference_model="true_model.h5",
+    reference_velocities={"VP": "VP", "RHO": "RHO"},
+).get_smoothing_config()
 
 smooth_model = smoothing.run(
     site_name="eejit",
@@ -111,14 +109,15 @@ smooth_model
 # ------------------------------------------------------------------------------
 # CREATE NEW SALVUS PROJECT
 # ------------------------------------------------------------------------------
-!rm -rf salvus_project
+!rm - rf salvus_project
 vm = sn.model.volume.cartesian.GenericModel(
     name="true_model", data=true_model)
-p = sn.Project.from_volume_model(path="salvus_project_master_thesis", volume_model=vm)
+p = sn.Project.from_volume_model(
+    path="salvus_project_master_thesis", volume_model=vm)
 
 
-wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)
-mesh_frequency =  wavelet.center_frequency
+wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
+mesh_frequency = wavelet.center_frequency
 
 
 # Sources
@@ -128,7 +127,7 @@ srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
 
 # Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
-        x=0, y=0, radius=3500, count=380, fields=["phi"]
+    x=0, y=0, radius=3500, count=380, fields=["phi"]
 )
 
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
@@ -154,8 +153,9 @@ p += sn.SimulationConfiguration(
     name="target_model",
     elements_per_wavelength=2,
     tensor_order=2,
-    max_frequency_in_hertz = 20.0,
-    model_configuration=sn.ModelConfiguration(background_model=None, volume_models=["true_model"]),
+    max_frequency_in_hertz=20.0,
+    model_configuration=sn.ModelConfiguration(
+        background_model=None, volume_models=["true_model"]),
     event_configuration=sn.EventConfiguration(
         waveform_simulation_configuration=wsc,
         wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)))
@@ -187,6 +187,8 @@ for sim in ["smooth_model", "target_model"]:
 # ------------------------------------------------------------------------------
 # Compute adjoint sources and gradients
 # ------------------------------------------------------------------------------
+
+
 def misfit_func(data_synthetic: np.ndarray,
                 data_observed: np.ndarray,
                 sampling_rate_in_hertz: float):
@@ -252,33 +254,33 @@ gradient
 # ------------------------------------------------------------------------------
 # COLLECT WAVEFORM DATA
 # ------------------------------------------------------------------------------
-#true_data = p.waveforms.get(
+# true_data = p.waveforms.get(
 #    data_name="initial_model", events=p.events.get_all())
 
-#direct_wave = p.waveforms.get(
+# direct_wave = p.waveforms.get(
 #    data_name="target_model", events=p.events.get_all())
 
-#Rt = ut.get_gather(true_data)
-#Rd = ut.get_gather(direct_wave)
-#R = Rt - Rd
+# Rt = ut.get_gather(true_data)
+# Rd = ut.get_gather(direct_wave)
+# R = Rt - Rd
 
 # ------------------------------------------------------------------------------
 # PLOT SHOT GATHER
 # ------------------------------------------------------------------------------
 # Normalize and plot the shotgather.
-#p_min, p_max = 0.001 * Rt.min(), 0.001 * Rt.max()
-#ext = [500, 3500, 3, 0]
+# p_min, p_max = 0.001 * Rt.min(), 0.001 * Rt.max()
+# ext = [500, 3500, 3, 0]
 
-#f, ax = plt.subplots(1, 3, figsize=(10, 8))
-#ax[0].imshow(Rt[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
+# f, ax = plt.subplots(1, 3, figsize=(10, 8))
+# ax[0].imshow(Rt[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
 #             aspect="auto", cmap="gray")
-#ax[1].imshow(Rd[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
+# ax[1].imshow(Rd[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
 #             aspect="auto", cmap="gray")
-#ax[2].imshow(R[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
+# ax[2].imshow(R[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
 #             aspect="auto", cmap="gray")
-#ax[0].set_title("P")
-#ax[1].set_title("P direct")
-#ax[2].set_title("P - direct wave removed")
+# ax[0].set_title("P")
+# ax[1].set_title("P direct")
+# ax[2].set_title("P - direct wave removed")
 
 # %%
 
@@ -291,7 +293,6 @@ synthetic_data[0].plot(component="A", receiver_field="phi")
 p.viz.nb.waveforms(
     ["target_model", "smooth_model"], receiver_field="phi"
 )
-
 
 
 # %%
