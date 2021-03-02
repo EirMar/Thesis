@@ -47,7 +47,7 @@ p = sn.Project.from_volume_model(
     path="project_salvus", volume_model=vm)
 
 # stf
-wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
+wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
 
 # Sources
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
@@ -65,19 +65,19 @@ wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=6.0)
 # Event configuration
 ec = sn.EventConfiguration(
     waveform_simulation_configuration=wsc,
-    wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0))
+    wavelet=wavelet)
 
 # Simulation Configuration - Model - true_model
 p += sn.SimulationConfiguration(
     name="target_model",
     elements_per_wavelength=2,
     tensor_order=2,
-    max_frequency_in_hertz=20.0,
+    max_frequency_in_hertz=f_max,
     model_configuration=sn.ModelConfiguration(
         background_model=None, volume_models=["true_model"]),
     event_configuration=sn.EventConfiguration(
         waveform_simulation_configuration=wsc,
-        wavelet=sn.simple_config.stf.Ricker(center_frequency=10.0)))
+        wavelet=wavelet))
 
 # Constan velocity model
 homo_mesh = p.simulations.get_mesh("target_model")
