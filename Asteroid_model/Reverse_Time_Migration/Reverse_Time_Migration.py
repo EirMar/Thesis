@@ -15,11 +15,7 @@ import salvus.namespace as sn
 
 import utils as ut
 
-
-# Variable used in the notebook to determine which site
-# is used to run the simulations.
-# SALVUS_FLOW_SITE_NAME=os.environ.get('SITE_NAME','local')
-SALVUS_FLOW_SITE_NAME = os.environ.get('eejit', 'eejit')
+SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 
 # Import the model
