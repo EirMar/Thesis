@@ -125,31 +125,21 @@ p.simulations.launch(
     wall_time_in_seconds_per_job=10,
 )
 
-
-# In[ ]:
-
-
+# %%
 p.simulations.query(block=True)
 
 
-# In[20]:
-
-
+# %%
 p.simulations.get_mesh("true_model_new_EM")
 
 
-# In[21]:
-
-
+# %%
 true_data = p.waveforms.get(
     data_name="true_model_new_EM", events=p.events.get_all()
 )
 
 
-# In[22]:
-
-
+# %%
 true_data[0].plot(component="A", receiver_field="phi")
 
-
-# In[ ]:
+# %%
