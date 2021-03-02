@@ -14,41 +14,30 @@ from salvus.opt import smoothing
 import salvus.namespace as sn
 
 import utils as ut
-
+from models import my_model
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
+# %%
+# Parameters
+c = 3e8                 # speed of light
+mu = 1                  #
+rho = 1000              # Density, rho = 1000 kg/m**3
+nx, ny = 3000, 3000     # Model size
+f_max = 15.0e6          # Maximum frequency
 
-# Import the model
-file = "vel1_copy.bin"
-dt = np.dtype([('time', '<u2'), ('time1', '<u2'),
-               ('time2', np.float32), ('time3', np.float32)])
-data = np.fromfile(file, dtype=np.float32, count=-1, sep='', offset=0)
+# Import the model - Relative Permittivity values
+data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
+                   sep='', offset=0)
 
-my_array_rel_perm = data.reshape(3000, 3000)
-my_array_rho = np.full((3000, 3000), 1000, dtype=int)
+eps_asteroid = data.reshape(nx, ny)                 # Velocity model
+rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
+mu_asteroid = np.full((nx, ny), 1, dtype=int)       # Magnetic Permeability
+v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
 
-# Define the model
+true_model = my_model(vp=v_radar, rho=rho_asteroid, nx=nx, nz=ny)
+true_model.vp.T.plot()
 
-
-def my_model():
-    nx, nz = 3000, 3000
-    x = np.linspace(-4000, +4000, nx)
-    y = np.linspace(-4000, +4000, nx)
-    xx, yy = np.meshgrid(x, y, indexing="ij")
-
-    # put the array elements into the appropriate part of the structure
-    ds = xr.Dataset(data_vars={"vp": (["x", "y"], my_array_rel_perm),
-                               "rho": (["x", "y"], my_array_rho), },
-                    coords={"x": x, "y": y},)
-
-    # Transform velocity to SI units (m/s).
-    ds['vp'] *= 10000
-
-    return ds
-
-
-true_model = my_model()
-
+# %%
 # Define the meshgrid
 
 wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
