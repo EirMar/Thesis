@@ -69,7 +69,7 @@ ec = sn.EventConfiguration(
 
 # Simulation Configuration - Model - true_model
 p += sn.SimulationConfiguration(
-    name="target_model",
+    name="RTM_sim",
     elements_per_wavelength=2,
     tensor_order=2,
     max_frequency_in_hertz=f_max,
@@ -80,7 +80,7 @@ p += sn.SimulationConfiguration(
         wavelet=wavelet))
 
 # Constan velocity model
-homo_mesh = p.simulations.get_mesh("target_model")
+homo_mesh = p.simulations.get_mesh("RTM_sim")
 homo_mesh.element_nodal_fields["VP"].fill(vp_asteroid[0, 0])
 homo_mesh.element_nodal_fields["RHO"].fill(rho_asteroid[0, 0])
 p.add_to_project(
@@ -94,7 +94,7 @@ p.add_to_project(
 # ------------------------------------------------------------------------------
 # RUN FORWARD SIMULATION
 # ------------------------------------------------------------------------------
-for sim, store in zip(["target_model", "direct_wave_sim"], [True, False]):
+for sim, store in zip(["RTM_sim", "direct_wave_sim"], [True, False]):
     p.simulations.launch(
         simulation_configuration=sim,
         events=p.events.get_all(),
@@ -105,7 +105,7 @@ for sim, store in zip(["target_model", "direct_wave_sim"], [True, False]):
         wall_time_in_seconds_per_job=1,)
 
 # %%
-for sim in ["target_model", "direct_wave_sim"]:
+for sim in ["RTM_sim", "direct_wave_sim"]:
     p.simulations.query(
         simulation_configuration=sim,
         events=p.events.list(),
@@ -134,7 +134,7 @@ p += sn.MisfitConfiguration(
 misfits = None
 while not misfits:
     misfits = p.actions.inversion.compute_misfits(
-        simulation_configuration="target_model",
+        simulation_configuration="RTM_sim",
         misfit_configuration="migration",
         store_checkpoints=False,
         events=p.events.list(),
@@ -152,7 +152,7 @@ print(misfits)
 # RUN ADJOINT SIMULATION
 # ------------------------------------------------------------------------------
 p.simulations.launch_adjoint(
-    simulation_configuration="target_model",
+    simulation_configuration="RTM_sim",
     misfit_configuration="migration",
     events=p.events.list(),
     site_name=SALVUS_FLOW_SITE_NAME,
@@ -162,7 +162,7 @@ p.simulations.launch_adjoint(
 
 # %%
 p.simulations.query(
-    simulation_configuration="target_model",
+    simulation_configuration="RTM_sim",
     events=p.events.list(),
     misfit_configuration="migration",
     ping_interval_in_seconds=1.0,
@@ -171,7 +171,7 @@ p.simulations.query(
 
 # %%
 gradient = p.actions.inversion.sum_gradients(
-    simulation_configuration="target_model",
+    simulation_configuration="RTM_sim",
     misfit_configuration="migration",
     events=p.events.list(),)
 
@@ -186,7 +186,7 @@ gradient
 #    data_name="initial_model", events=p.events.get_all())
 
 # direct_wave = p.waveforms.get(
-#    data_name="target_model", events=p.events.get_all())
+#    data_name="RTM_sim", events=p.events.get_all())
 
 # Rt = ut.get_gather(true_data)
 # Rd = ut.get_gather(direct_wave)
@@ -219,7 +219,7 @@ synthetic_data = p.waveforms.get(
 synthetic_data[0].plot(component="A", receiver_field="phi")
 
 p.viz.nb.waveforms(
-    ["target_model", "smooth_model"], receiver_field="phi"
+    ["RTM_sim", "smooth_model"], receiver_field="phi"
 )
 
 
