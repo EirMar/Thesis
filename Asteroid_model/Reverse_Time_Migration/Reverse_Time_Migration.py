@@ -46,11 +46,11 @@ true_model.vp.T.plot()
 # ------------------------------------------------------------------------------
 # CREATE NEW SALVUS PROJECT
 # ------------------------------------------------------------------------------
-!rm - rf salvus_project
+get_ipython().system('rm -rf project_salvus')
 vm = sn.model.volume.cartesian.GenericModel(
     name="true_model", data=true_model)
 p = sn.Project.from_volume_model(
-    path="salvus_project_master_thesis", volume_model=vm)
+    path="project_salvus", volume_model=vm)
 
 
 wavelet = sn.simple_config.stf.Ricker(center_frequency=10.0)
