@@ -13,7 +13,7 @@ import salvus.namespace as sn
 
 from utils import my_model
 
-SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'local')
+SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
 # Parameters
@@ -21,7 +21,7 @@ c = 3e8                 # speed of light
 mu = 1                  #
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
-f_max = 20              # Maximum frequency
+f_max = 15.0e6          # Maximum frequency
 
 # Import the model - Relative Permittivity values
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -66,7 +66,7 @@ else:
     p = sn.Project.from_volume_model(path="project", volume_model=vm)
 
 # stf
-wavelet = sn.simple_config.stf.Ricker(center_frequency=15.0e6)
+wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
 
 # Sources
 srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
