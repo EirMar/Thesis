@@ -13,13 +13,13 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
 # Parameters
-ns = 20                 # Number of sources
+ns = 40                 # Number of sources
 nr = 380                # Number of receivers
 r_ring = 3500           # Satellite altitud
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
-f_max = 20              # Maximum frequency
+f_max = 30              # Maximum frequency
 
 # Load model
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -71,7 +71,7 @@ absorbing_par = sn.simple_mesh.basic_mesh.AbsorbingBoundaryParameters(
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 # Waveform Simulation Configuration
-wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=6.0)
+wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=5.0)
 
 # Event configuration
 ec = sn.EventConfiguration(
@@ -114,7 +114,7 @@ for sim, store in zip(["RTM_sim", "direct_wave_sim"], [True, False]):
         ranks_per_job=48,
         verbosity=2,
         store_adjoint_checkpoints=True,
-        wall_time_in_seconds_per_job=1,)
+        wall_time_in_seconds_per_job=10,)
 
 # %%
 for sim in ["RTM_sim", "direct_wave_sim"]:
@@ -152,7 +152,7 @@ while not misfits:
         events=p.events.list(),
         ranks_per_job=48,
         site_name=SALVUS_FLOW_SITE_NAME,
-        wall_time_in_seconds_per_job=1,
+        wall_time_in_seconds_per_job=10,
         verbosity=2,
     )
     time.sleep(5.0)
@@ -169,7 +169,7 @@ p.simulations.launch_adjoint(
     events=p.events.list(),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=48,
-    wall_time_in_seconds_per_job=1,
+    wall_time_in_seconds_per_job=10,
     verbosity=True,)
 
 # %%
