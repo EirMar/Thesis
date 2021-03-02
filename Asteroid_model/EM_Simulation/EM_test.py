@@ -21,8 +21,6 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'local')
 
 file = "vel1_copy.bin"
 
-dt = np.dtype([('time', '<u2'), ('time1', '<u2'),
-               ('time2', np.float32), ('time3', np.float32)])
 
 data = np.fromfile(file, dtype=np.float32, count=-1, sep='', offset=0)
 
