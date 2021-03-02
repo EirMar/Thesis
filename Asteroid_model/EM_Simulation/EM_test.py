@@ -6,122 +6,53 @@ import matplotlib.pyplot as plt
 from IPython import get_ipython
 import numpy as np
 import pathlib
-import xarray as xr
 
-import salvus.namespace as sn
-from salvus.flow import simple_config as config
 from salvus.toolbox import toolbox
+from salvus.flow import simple_config as config
+import salvus.namespace as sn
+
+from utils import my_model
 
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'local')
 
 # %%
-
+# Parameters
+c = 3e8                 # speed of light
+mu = 1                  #
+rho = 1000              # Density, rho = 1000 kg/m**3
+nx, ny = 3000, 3000     # Model size
 
 # Import the model - Relative Permittivity values
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
 
-array_eps_rel = data.reshape(3000, 3000)
-
-print(array_eps_rel)
-# print(my_array_eps_rel[1500,1500])
-# print(my_array_eps_rel[2999,2999])
-# print(my_array_eps_rel[1700,1700])
-# print(data)
-# type(data)
-
-
-# %%
-
-
-# Density
-array_rho = np.full((3000, 3000), 1000, dtype=int)
-print(array_rho)
-
-
-# %%
-
-
-# Magnetic Permeability
-array_mu = np.full((3000, 3000), 1, dtype=int)
-print(array_mu)
-
-
-# %%
-
-
-c = 3e8  # speed of light
-mu = 1
-#v_radar = c / math.sqrt(mu * array_eps_rel)
-
-array_eps_rel_sqrt = np.sqrt(array_eps_rel)
-print(array_eps_rel_sqrt)
-
-v_radar = c / (mu * array_eps_rel_sqrt)
-print(v_radar)
-
-# or
-
-#v_radar_1 = np.divide(c, array_eps_rel_sqrt)
-# print(v_radar_1)
-
-
-# %%
-
+eps_asteroid = data.reshape(nx, ny)                 # Velocity model
+rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
+mu_asteroid = np.full((nx, ny), 1, dtype=int)       # Magnetic Permeability
+v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
 
 plt.imshow(np.rot90(v_radar, 3))
 plt.title('Asteroid model')
 plt.colorbar(orientation='vertical')
 plt.xlabel('x (m)')
 plt.ylabel('y (m)')
-
-#plt.figure(figsize=(16, 6))
-
-# plt.subplot(121)
-# true_model.vp.T.plot()
-# plt.subplot(122)
-# true_model.rho.T.plot()
-
 plt.show()
 
 
 # %%
+true_model = my_model(vp=v_radar, rho=rho_asteroid, nx=nx, nz=ny)
 
-
-def my_model():
-    nx, nz = 3000, 3000
-    x = np.linspace(-500, +500, nx)
-    y = np.linspace(-500, +500, nx)
-    xx, yy = np.meshgrid(x, y, indexing="ij")
-
-    # put the array elements into the appropriate part of the model xarray structure
-    ds = xr.Dataset(data_vars={"vp": (["x", "y"], v_radar),  "rho": (
-        ["x", "y"], array_rho), }, coords={"x": x, "y": y},)
-
-    # ds['vp'] *=10e9 #10e9
-    return ds
-
-
-# %%
-
-
-true_model = my_model()
-
-# Plot the xarray dataset.
 plt.figure(figsize=(16, 6))
-
 plt.subplot(121)
+plt.title("Asteroid model")
 true_model.vp.T.plot()
-plt.xlabel("x (m)")
-plt.ylabel("y (m)")
-
+plt.subplot(122)
+true_model.rho.T.plot()
 plt.suptitle("Asteroid model")
 plt.show()
 
 
 # %%
-
-
 get_ipython().system('rm -rf project')
 if pathlib.Path("project").exists():
     print("Opening existing project.")
