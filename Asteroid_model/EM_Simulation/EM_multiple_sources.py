@@ -78,10 +78,7 @@ recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
 
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
-
-# In[29]:
-
-
+# Boundaries Conditions
 num_absorbing_layers = 10
 absorbing_side_sets = ["x0", "x1", "y0", "y1"]
 
@@ -89,52 +86,27 @@ mesh = toolbox.mesh_from_xarray(
     model_order=4,
     data=true_model,
     slowest_velocity='vp',
-    maximum_frequency=mesh_frequency,
+    maximum_frequency=f_max,
     elements_per_wavelength=2,
     absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
 
 
-# In[30]:
-
-
-mesh
-
-
-# In[31]:
-
-
+# %%
+# salvus simulation object
 sim = config.simulation.Waveform(mesh=mesh, sources=srcs, receivers=recs)
-
-
-# In[32]:
-
-
-sim
-
-
-# In[33]:
-
-
-# s.physics.wave_equation.start_time_in_seconds =
-#wsc = sn.WaveformSimulationConfiguration(start_time_in_seconds=1e-9)
 wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=9.5e-6)
 wsc.physics.wave_equation.time_step_in_seconds = 1.0e-10
-
-
-# In[34]:
-
 
 ec = sn.EventConfiguration(
     waveform_simulation_configuration=wsc,
     wavelet=sn.simple_config.stf.Ricker(center_frequency=20.0e6),
 )
 
-
 p += sn.SimulationConfiguration(
     name="true_model_new_EM",
     elements_per_wavelength=1.5,
     tensor_order=4,
-    max_frequency_in_hertz=mesh_frequency,
+    max_frequency_in_hertz=f_max,
     model_configuration=sn.ModelConfiguration(
         background_model=None, volume_models="true_model_EM"
     ),
