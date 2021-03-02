@@ -100,7 +100,7 @@ p.add_to_project(
 # ------------------------------------------------------------------------------
 # RUN FORWARD SIMULATION
 # ------------------------------------------------------------------------------
-for sim, store in zip(["smooth_model", "target_model"], [True, False]):
+for sim, store in zip(["target_model", "direct_wave_sim"], [True, False]):
     p.simulations.launch(
         simulation_configuration=sim,
         events=p.events.get_all(),
