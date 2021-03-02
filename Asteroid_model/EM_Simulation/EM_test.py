@@ -78,10 +78,7 @@ recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
 
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
-
-# In[13]:
-
-
+# Boundaries Conditions
 num_absorbing_layers = 10
 absorbing_side_sets = ["x0", "x1", "y0", "y1"]
 
@@ -95,45 +92,21 @@ mesh = toolbox.mesh_from_xarray(
 
 
 # %%
-
-
-mesh
-
-
-# %%
-
-
+# salvus simulation object
 sim = config.simulation.Waveform(mesh=mesh, sources=srcs, receivers=recs)
-
-
-# %%
-
-
-sim
-
-
-# %%
-
-
-#wsc = sn.WaveformSimulationConfiguration(start_time_in_seconds=1e-9)
 wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=9.5e-6)
 wsc.physics.wave_equation.time_step_in_seconds = 1.0e-10
-
-
-# %%
-
 
 ec = sn.EventConfiguration(
     waveform_simulation_configuration=wsc,
     wavelet=sn.simple_config.stf.Ricker(center_frequency=20.0e6),
 )
 
-
 p += sn.SimulationConfiguration(
     name="true_model_new_EM",
     elements_per_wavelength=1.5,
     tensor_order=4,
-    max_frequency_in_hertz=mesh_frequency,
+    max_frequency_in_hertz=f_max,
     model_configuration=sn.ModelConfiguration(
         background_model=None, volume_models="true_model_EM"
     ),
@@ -143,41 +116,27 @@ p += sn.SimulationConfiguration(
 
 
 # %%
-
-
+# Modeling
 p.simulations.launch(
     simulation_configuration="true_model_new_EM",
     events=p.events.get_all(),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=1,
-
 )
 
-
 # %%
-
-
 p.simulations.query(block=True)
 
 
 # %%
-
-
 p.simulations.get_mesh("true_model_new_EM")
 
 
 # %%
-
-
 true_data = p.waveforms.get(
     data_name="true_model_new_EM", events=p.events.get_all()
 )
 
 
 # %%
-
-
 true_data[0].plot(component="A", receiver_field="phi")
-
-
-# %%
