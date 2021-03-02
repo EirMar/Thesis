@@ -115,15 +115,14 @@ p += sn.SimulationConfiguration(
 )
 
 
-# In[35]:
-
-
+# %%
+# Modeling
 p.simulations.launch(
     simulation_configuration="true_model_new_EM",
     events=p.events.get_all(),
     site_name=SALVUS_FLOW_SITE_NAME,
-    ranks_per_job=1,
-
+    ranks_per_job=28,
+    wall_time_in_seconds_per_job=10,
 )
 
 
