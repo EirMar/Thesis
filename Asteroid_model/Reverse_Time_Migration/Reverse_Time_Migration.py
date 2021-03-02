@@ -112,12 +112,11 @@ for sim in ["target_model", "direct_wave_sim"]:
         verbosity=2,
         block=True,)
 
+
 # %%
 # ------------------------------------------------------------------------------
 # Compute adjoint sources and gradients
 # ------------------------------------------------------------------------------
-
-
 def misfit_func(data_synthetic: np.ndarray,
                 data_observed: np.ndarray,
                 sampling_rate_in_hertz: float):
