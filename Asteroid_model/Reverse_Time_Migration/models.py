@@ -6,8 +6,8 @@ def my_model(vp, rho, nx, nz):
     """
     """
 
-    x = np.linspace(-500, +500, nx)
-    y = np.linspace(-500, +500, nx)
+    x = np.linspace(-4000, +4000, nx)
+    y = np.linspace(-4000, +4000, nx)
     xx, yy = np.meshgrid(x, y, indexing="ij")
 
     # xarray dataset containing vp, rho
