@@ -222,14 +222,14 @@ gradient
 # %%
 
 synthetic_data = p.waveforms.get(
-    data_name="smooth_model", events=p.events.get_all()
+    data_name="direct_wave_sim", events=p.events.get_all()
 )
 
 synthetic_data[0].plot(component="A", receiver_field="phi")
 
-p.viz.nb.waveforms(
-    ["RTM_sim", "smooth_model"], receiver_field="phi"
-)
+# p.viz.nb.waveforms(
+#     ["RTM_sim", "smooth_model"], receiver_field="phi"
+# )
 
 
 # %%
@@ -271,8 +271,3 @@ p.viz.nb.waveforms(
 #     wall_time_in_seconds_per_job=10000
 # )
 # smooth_model
-
-# %%
-get_ipython().system('rm -rf project_salvus')
-
-# %%
