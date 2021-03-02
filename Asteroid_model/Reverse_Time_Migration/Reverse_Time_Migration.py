@@ -182,6 +182,12 @@ p.simulations.query(
     block=True,)
 
 # %%
+p.viz.nb.gradients(
+    simulation_configuration="RTM_sim",
+    misfit_configuration="migration",
+    events=p.events.list(),)
+
+# %%
 gradient = p.actions.inversion.sum_gradients(
     simulation_configuration="RTM_sim",
     misfit_configuration="migration",
