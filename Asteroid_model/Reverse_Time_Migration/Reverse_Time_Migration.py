@@ -194,48 +194,24 @@ gradient
 # ------------------------------------------------------------------------------
 # COLLECT WAVEFORM DATA
 # ------------------------------------------------------------------------------
-# true_data = p.waveforms.get(
-#    data_name="initial_model", events=p.events.get_all())
+true_data = p.waveforms.get(
+    data_name="RTM_sim", events=p.events.get_all())
 
-# direct_wave = p.waveforms.get(
-#    data_name="RTM_sim", events=p.events.get_all())
+direct_wave = p.waveforms.get(
+    data_name="direct_wave_sim", events=p.events.get_all())
+
+true_data[0].plot(component="A", receiver_field="phi")
+
+
+# %%
+p.viz.nb.waveforms(
+    ["RTM_sim", "direct_wave_sim"], receiver_field="phi"
+)
 
 # Rt = ut.get_gather(true_data)
 # Rd = ut.get_gather(direct_wave)
 # R = Rt - Rd
 
-# ------------------------------------------------------------------------------
-# PLOT SHOT GATHER
-# ------------------------------------------------------------------------------
-# Normalize and plot the shotgather.
-# p_min, p_max = 0.001 * Rt.min(), 0.001 * Rt.max()
-# ext = [500, 3500, 3, 0]
-
-# f, ax = plt.subplots(1, 3, figsize=(10, 8))
-# ax[0].imshow(Rt[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
-#             aspect="auto", cmap="gray")
-# ax[1].imshow(Rd[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
-#             aspect="auto", cmap="gray")
-# ax[2].imshow(R[:, :, 10], vmin=p_min, vmax=p_max, extent=ext,
-#             aspect="auto", cmap="gray")
-# ax[0].set_title("P")
-# ax[1].set_title("P direct")
-# ax[2].set_title("P - direct wave removed")
-
-# %%
-
-synthetic_data = p.waveforms.get(
-    data_name="direct_wave_sim", events=p.events.get_all()
-)
-
-synthetic_data[0].plot(component="A", receiver_field="phi")
-
-# p.viz.nb.waveforms(
-#     ["RTM_sim", "smooth_model"], receiver_field="phi"
-# )
-
-
-# %%
 
 # # %%
 # # ----------------------------------------------------------------------------
