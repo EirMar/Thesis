@@ -19,7 +19,7 @@ r_ring = 3500           # Satellite altitud
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
-f_max = 60              # Maximum frequency
+f_max = 30              # Maximum frequency
 max_x, max_y = 4000, 4000   # Model extension
 
 # Load model
@@ -33,13 +33,6 @@ true_model = my_model(vp=vp_asteroid, rho=rho_asteroid,
                       max_x=max_x, max_y=max_y)
 true_model.vp.T.plot()
 
-
-# ------------------------------------------------------------------------------
-# SMOOTH VELOCITY MODEL
-# ------------------------------------------------------------------------------
-#
-#
-#
 
 # %%
 # ------------------------------------------------------------------------------
@@ -101,9 +94,26 @@ p.add_to_project(
     sn.UnstructuredMeshSimulationConfiguration(
         name="direct_wave_sim",
         unstructured_mesh=homo_mesh,
-        event_configuration=ec
-    )
-)
+        event_configuration=ec))
+
+# SMOOTHED VELOCITY MODEL
+smooth_mesh = p.actions.inversion.smooth_model(
+    model=p.simulations.get_mesh("RTM_sim"),
+    smoothing_configuration=sn.ConstantSmoothing(
+        smoothing_lengths_in_meters={"VP": 15.0,
+                                     "RHO": 15.0, }),
+    site_name=SALVUS_FLOW_SITE_NAME,
+    ranks_per_job=48,
+    verbosity=2,
+    wall_time_in_seconds_per_job=10000,)
+
+p.add_to_project(
+    sn.UnstructuredMeshSimulationConfiguration(
+        name="RTM_smooth_sim",
+        unstructured_mesh=smooth_mesh,
+        event_configuration=ec))
+
+
 # %%
 # ------------------------------------------------------------------------------
 # RUN FORWARD SIMULATION
@@ -219,42 +229,3 @@ p.viz.nb.waveforms(
 # Rt = ut.get_gather(true_data)
 # Rd = ut.get_gather(direct_wave)
 # R = Rt - Rd
-
-
-# # %%
-# # ----------------------------------------------------------------------------
-# # SMOOTH VELOCITY MODEL
-# # ----------------------------------------------------------------------------
-# # Boundaries Conditions
-# num_absorbing_layers = 10
-# absorbing_side_sets = ["x0", "x1", "y0", "y1"]
-#
-# # Create a mesh from xarray Dataset
-# mesh = toolbox.mesh_from_xarray(
-#     model_order=4,
-#     data=true_model,
-#     slowest_velocity="vp",
-#     maximum_frequency=0.5*f_max,
-#     elements_per_wavelength=1.5,
-#     absorbing_boundaries=(absorbing_side_sets, num_absorbing_layers))
-#
-# # Smooth the model
-# mesh.write_h5("true_model.h5")
-# smoothing_config = sn.ModelDependentSmoothing(
-#     smoothing_lengths_in_wavelengths={
-#         "VP": 2.0,
-#         "RHO": 2.0
-#     },
-#     reference_frequency_in_hertz=20,
-#     reference_model="true_model.h5",
-#     reference_velocities={"VP": "VP", "RHO": "RHO"},
-# ).get_smoothing_config()
-#
-# smooth_model = smoothing.run(
-#     site_name="eejit",
-#     ranks_per_job=48,
-#     model=mesh,
-#     smoothing_config=smoothing_config,
-#     wall_time_in_seconds_per_job=10000
-# )
-# smooth_model
