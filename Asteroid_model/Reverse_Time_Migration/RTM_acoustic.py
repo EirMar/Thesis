@@ -100,8 +100,8 @@ p.add_to_project(
 smooth_mesh = p.actions.inversion.smooth_model(
     model=p.simulations.get_mesh("RTM_sim"),
     smoothing_configuration=sn.ConstantSmoothing(
-        smoothing_lengths_in_meters={"VP": 15.0,
-                                     "RHO": 15.0, }),
+        smoothing_lengths_in_meters={"VP": 20.0,
+                                     "RHO": 20.0, }),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=48,
     verbosity=2,
@@ -118,7 +118,7 @@ p.add_to_project(
 # ------------------------------------------------------------------------------
 # RUN FORWARD SIMULATION
 # ------------------------------------------------------------------------------
-for sim, store in zip(["RTM_sim", "direct_wave_sim"], [True, False]):
+for sim, store in zip(["RTM_smooth_sim", "direct_wave_sim"], [True, False]):
     p.simulations.launch(
         simulation_configuration=sim,
         events=p.events.get_all(),
@@ -129,7 +129,7 @@ for sim, store in zip(["RTM_sim", "direct_wave_sim"], [True, False]):
         wall_time_in_seconds_per_job=10000,)
 
 # %%
-for sim in ["RTM_sim", "direct_wave_sim"]:
+for sim in ["RTM_smooth_sim", "direct_wave_sim"]:
     p.simulations.query(
         simulation_configuration=sim,
         events=p.events.list(),
@@ -158,7 +158,7 @@ p += sn.MisfitConfiguration(
 misfits = None
 while not misfits:
     misfits = p.actions.inversion.compute_misfits(
-        simulation_configuration="RTM_sim",
+        simulation_configuration="RTM_smooth_sim",
         misfit_configuration="migration",
         store_checkpoints=False,
         events=p.events.list(),
@@ -176,7 +176,7 @@ print(misfits)
 # RUN ADJOINT SIMULATION
 # ------------------------------------------------------------------------------
 p.simulations.launch_adjoint(
-    simulation_configuration="RTM_sim",
+    simulation_configuration="RTM_smooth_sim",
     misfit_configuration="migration",
     events=p.events.list(),
     site_name=SALVUS_FLOW_SITE_NAME,
@@ -186,7 +186,7 @@ p.simulations.launch_adjoint(
 
 # %%
 p.simulations.query(
-    simulation_configuration="RTM_sim",
+    simulation_configuration="RTM_smooth_sim",
     events=p.events.list(),
     misfit_configuration="migration",
     ping_interval_in_seconds=1.0,
@@ -195,13 +195,13 @@ p.simulations.query(
 
 # %%
 p.viz.nb.gradients(
-    simulation_configuration="RTM_sim",
+    simulation_configuration="RTM_smooth_sim",
     misfit_configuration="migration",
     events=p.events.list(),)
 
 # %%
 gradient = p.actions.inversion.sum_gradients(
-    simulation_configuration="RTM_sim",
+    simulation_configuration="RTM_smooth_sim",
     misfit_configuration="migration",
     events=p.events.list(),)
 
