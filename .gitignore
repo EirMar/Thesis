@@ -133,3 +133,6 @@ dmypy.json
 
 # Salvus projects
 **/project*/
+
+# Python test
+**/test*.py
