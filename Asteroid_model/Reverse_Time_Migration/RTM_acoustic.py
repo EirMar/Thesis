@@ -116,7 +116,7 @@ for sim, store in zip(["RTM_sim", "direct_wave_sim"], [True, False]):
         ranks_per_job=48,
         verbosity=2,
         store_adjoint_checkpoints=True,
-        wall_time_in_seconds_per_job=1000,)
+        wall_time_in_seconds_per_job=10000,)
 
 # %%
 for sim in ["RTM_sim", "direct_wave_sim"]:
@@ -154,7 +154,7 @@ while not misfits:
         events=p.events.list(),
         ranks_per_job=48,
         site_name=SALVUS_FLOW_SITE_NAME,
-        wall_time_in_seconds_per_job=1000,
+        wall_time_in_seconds_per_job=10000,
         verbosity=2,
     )
     time.sleep(5.0)
@@ -171,7 +171,7 @@ p.simulations.launch_adjoint(
     events=p.events.list(),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=48,
-    wall_time_in_seconds_per_job=1000,
+    wall_time_in_seconds_per_job=10000,
     verbosity=True,)
 
 # %%
