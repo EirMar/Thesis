@@ -20,6 +20,7 @@ rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
 f_max = 20              # Maximum frequency
+max_x, max_y = 4000, 4000   # Model extension
 
 # Load model
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -28,7 +29,8 @@ data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
 vp_asteroid = data.reshape(nx, ny)                  # Velocity model
 rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
 
-true_model = my_model(vp=vp_asteroid, rho=rho_asteroid, nx=nx, nz=ny)
+true_model = my_model(vp=vp_asteroid, rho=rho_asteroid,
+                      max_x=max_x, max_y=max_y)
 true_model.vp.T.plot()
 
 
