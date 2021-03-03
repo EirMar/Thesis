@@ -2,10 +2,13 @@
 # coding: utf-8
 # %%
 import os
+import matplotlib.pyplot as plt
 from IPython import get_ipython
+import xarray as xr
 import numpy as np
 import time
 
+from salvus.mesh.unstructured_mesh_utils import extract_model_to_regular_grid
 import salvus.namespace as sn
 from models import my_model
 import utils as ut
@@ -17,6 +20,7 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 ns = 1                  # Number of sources
 nr = 380                # Number of receivers
 r_ring = 3500           # Satellite altitud
+t_max = 6.0             # Simulation time
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
@@ -67,7 +71,7 @@ absorbing_par = sn.simple_mesh.basic_mesh.AbsorbingBoundaryParameters(
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 # Waveform Simulation Configuration
-wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=6.0)
+wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=t_max)
 
 # Event configuration
 ec = sn.EventConfiguration(
@@ -221,3 +225,57 @@ direct_wave = p.waveforms.get(
 gather_full,  = ut.get_gather(data=fwd_data, rcv_field="phi"),
 gather_direct = ut.get_gather(data=direct_wave, rcv_field="phi")
 gather = gather_full - gather_direct     # Direct wave removal
+
+# %%
+# ------------------------------------------------------------------------------
+# PLOT SHOT GATHER
+# ------------------------------------------------------------------------------
+# Normalize and plot the shotgather.
+p_min, p_max = 0.01 * gather_full.min(), 0.01 * gather_full.max()
+ext = [0, 360, t_max, 0]
+ns = 20
+theta_lim = [0, 360]
+
+f, ax = plt.subplots(1, 3, figsize=(16, 6))
+ax[0].imshow(gather_full[:, :, ns], vmin=p_min, vmax=p_max, extent=ext,
+             aspect="auto", cmap="gray")
+ax[1].imshow(gather_direct[:, :, ns], vmin=p_min, vmax=p_max, extent=ext,
+             aspect="auto", cmap="gray")
+ax[2].imshow(gather[:, :, ns], vmin=0.5*p_min, vmax=0.5*p_max, extent=ext,
+             aspect="auto", cmap="gray")
+
+ax[0].set_xlim(theta_lim)
+ax[1].set_xlim(theta_lim)
+ax[2].set_xlim(theta_lim)
+
+ax[0].set_title("P")
+ax[1].set_title("P direct")
+ax[2].set_title("P - direct wave removed")
+
+# %%
+ds = extract_model_to_regular_grid(
+    mesh=gradient,
+    ds=xr.Dataset(
+        coords={"x": np.linspace(-max_x, +max_y, nx),
+                "y": np.linspace(-max_x, +max_y, ny), }),
+    pars=["RHO"],
+    verbose=True,
+)
+
+# %%
+RHO = ds.RHO.data
+ny_cut = 200
+nx_cut = 100
+RHO = RHO[nx_cut:nx-nx_cut, ny_cut:ny-ny_cut]
+
+p_min, p_max = 0.03*RHO.min(), 0.03*RHO.max()
+ext = [-max_x, max_x, -max_y, max_y, ]
+x_lim, y_lim = [-1800, 1800], [-1200, 1000]
+
+plt.figure(figsize=(8, 6))
+plt.imshow(RHO.T, vmin=p_min, vmax=p_max, extent=ext,
+           aspect="auto", cmap="gray")
+plt.xlim(x_lim)
+plt.ylim(y_lim)
+
+# %%
