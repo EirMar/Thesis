@@ -1,7 +1,12 @@
 
 import numpy as np
 import xarray as xr
+import h5py
+import salvus
+
 from scipy.signal import filtfilt
+
+from typing import Union
 
 
 def get_layers(vp, rho, depth, x_max: float = 1000, nsmooth: int = 0):
@@ -69,3 +74,45 @@ def get_gather(true_data):
     R = np.asarray(ref).transpose()
 
     return R
+
+
+def overwrite_receivers_h5(
+    new_data: np.ndarray,
+    events: Union[
+        str,
+        salvus.flow.collections.event_data_collection.EventDataCollection],
+    field: str,
+    sampling_rate_Hz: float,
+    start_time_sec: float = 0.0,
+    cmp: int = 0,
+
+) -> None:
+    """
+    Overwrite the synthetic receiver data with a give np.ndarray. It access
+    receivers.h5 created by Salvus and overwrites the data in the group
+    /point/<fieldname>. This will keep all meta information about location,
+    sampling rate, etc.
+
+    Inspecting receivers.h5
+        $ h5dump -H receivers.h5
+
+    Use python methods dir() and vars() to inspect EventData object
+
+    :param new_data: np.ndarray of shape [nt, n_rcv, n_src]
+    :param events: EventDataCollection in salvus project
+    :param field: Name of field to write (i.e. "phi", "phi_t", etc)
+    :param sampling_rate_Hz: Sampling rate in Hz of new_data, along time axis
+    :param start_time_sec: Starting time in seconds for new_data
+    :param cmp: Index of the component to write, by default 0.
+    """
+    start_time_sec = np.array([start_time_sec])
+    sampling_rate_Hz = np.array([sampling_rate_Hz])
+    for i, event in enumerate(events):
+        with h5py.File(event._data_object, mode="r+") as fh:
+            # Get receivers ID
+            receiver_id = fh["receiver_ids_ACOUSTIC_point"][...]
+            # Overwrite point data
+            fh["point/{}".format(field)][:, cmp, :] = \
+                new_data[:, receiver_id, i].T
+            fh["point"].attrs["sampling_rate_in_hertz"] = sampling_rate_Hz
+            fh["point"].attrs["start_time_in_seconds"] = start_time_sec
