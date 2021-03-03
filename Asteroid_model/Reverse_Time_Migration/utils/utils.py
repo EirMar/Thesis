@@ -55,15 +55,15 @@ def get_layers(vp, rho, depth, x_max: float = 1000, nsmooth: int = 0):
     return ds
 
 
-def get_gather(true_data, rcv_field):
+def get_gather(data, rcv_field):
     """Returs a numpy array of the salvus modelled data, shot gather.
 
-    :param true_data: salvus synthetic data, EventDataCollection
+    :param data: salvus synthetic data, EventDataCollection
             salvus.flow.collections.event_data_collection.EventDataCollection
     :return: shot gather, ndarray
     """
     ref = []
-    for i, event in enumerate(true_data):
+    for i, event in enumerate(data):
         shot_gather = []
         for j, rcv in enumerate(event.receiver_name_list):
             tr = event.get_receiver_data(receiver_name=rcv,
