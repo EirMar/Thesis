@@ -8,6 +8,7 @@ import time
 
 import salvus.namespace as sn
 from models import my_model
+import utils as ut
 
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
@@ -212,20 +213,11 @@ gradient
 # ------------------------------------------------------------------------------
 # COLLECT WAVEFORM DATA
 # ------------------------------------------------------------------------------
-true_data = p.waveforms.get(
-    data_name="RTM_sim", events=p.events.get_all())
-
+fwd_data = p.waveforms.get(
+    data_name="RTM_smooth_sim", events=p.events.get_all())
 direct_wave = p.waveforms.get(
     data_name="direct_wave_sim", events=p.events.get_all())
 
-true_data[0].plot(component="A", receiver_field="phi")
-
-
-# %%
-p.viz.nb.waveforms(
-    ["RTM_sim", "direct_wave_sim"], receiver_field="phi"
-)
-
-# Rt = ut.get_gather(true_data)
-# Rd = ut.get_gather(direct_wave)
-# R = Rt - Rd
+gather_full,  = ut.get_gather(data=fwd_data, rcv_field="phi"),
+gather_direct = ut.get_gather(data=direct_wave, rcv_field="phi")
+gather = gather_full - gather_direct     # Direct wave removal
