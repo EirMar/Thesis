@@ -233,7 +233,7 @@ gather = gather_full - gather_direct     # Direct wave removal
 # Normalize and plot the shotgather.
 p_min, p_max = 0.01 * gather_full.min(), 0.01 * gather_full.max()
 ext = [0, 360, t_max, 0]
-ns = 20
+ns = 0
 theta_lim = [0, 360]
 
 f, ax = plt.subplots(1, 3, figsize=(16, 6))
@@ -264,13 +264,13 @@ ds = extract_model_to_regular_grid(
 
 # %%
 RHO = ds.RHO.data
-ny_cut = 200
-nx_cut = 100
+ny_cut = 800
+nx_cut = 300
 RHO = RHO[nx_cut:nx-nx_cut, ny_cut:ny-ny_cut]
 
-p_min, p_max = 0.03*RHO.min(), 0.03*RHO.max()
+p_min, p_max = 0.1*RHO.min(), 0.1*RHO.max()
 ext = [-max_x, max_x, -max_y, max_y, ]
-x_lim, y_lim = [-1800, 1800], [-1200, 1000]
+x_lim, y_lim = [-4000, 3500], [-3800, 3000]
 
 plt.figure(figsize=(8, 6))
 plt.imshow(RHO.T, vmin=p_min, vmax=p_max, extent=ext,
