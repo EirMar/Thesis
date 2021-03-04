@@ -24,7 +24,7 @@ t_max = 6.0             # Simulation time
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
-f_max = 30              # Maximum frequency
+f_max = 60              # Maximum frequency
 max_x, max_y = 4000, 4000   # Model extension
 
 # Load model
@@ -105,8 +105,8 @@ p.add_to_project(
 smooth_mesh = p.actions.inversion.smooth_model(
     model=p.simulations.get_mesh("RTM_sim"),
     smoothing_configuration=sn.ConstantSmoothing(
-        smoothing_lengths_in_meters={"VP": 20.0,
-                                     "RHO": 20.0, }),
+        smoothing_lengths_in_meters={"VP": 15.0,
+                                     "RHO": 15.0, }),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=48,
     verbosity=2,
@@ -222,7 +222,7 @@ fwd_data = p.waveforms.get(
 direct_wave = p.waveforms.get(
     data_name="direct_wave_sim", events=p.events.get_all())
 
-gather_full,  = ut.get_gather(data=fwd_data, rcv_field="phi"),
+gather_full = ut.get_gather(data=fwd_data, rcv_field="phi"),
 gather_direct = ut.get_gather(data=direct_wave, rcv_field="phi")
 gather = gather_full - gather_direct     # Direct wave removal
 
@@ -231,7 +231,7 @@ gather = gather_full - gather_direct     # Direct wave removal
 # PLOT SHOT GATHER
 # ------------------------------------------------------------------------------
 # Normalize and plot the shotgather.
-p_min, p_max = 0.01 * gather_full.min(), 0.01 * gather_full.max()
+p_min, p_max = 0.005 * gather_full.min(), 0.005 * gather_full.max()
 ext = [0, 360, t_max, 0]
 ns = 0
 theta_lim = [0, 360]
