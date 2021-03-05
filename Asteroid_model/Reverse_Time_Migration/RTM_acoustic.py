@@ -17,14 +17,14 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
 # %%
 # Parameters
-ns = 1                  # Number of sources
+ns = 40                  # Number of sources
 nr = 380                # Number of receivers
 r_ring = 3500           # Satellite altitud
 t_max = 6.0             # Simulation time
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 dt, dx = 0.02, 1        # Time step, space step
-f_max = 60              # Maximum frequency
+f_max = 20              # Maximum frequency
 max_x, max_y = 4000, 4000   # Model extension
 
 # Load model
@@ -279,3 +279,10 @@ plt.xlim(x_lim)
 plt.ylim(y_lim)
 
 # %%
+p.simulations.get_mesh("RTM_sim")
+
+# %%
+p.simulations.get_mesh("RTM_smooth_sim")
+
+# %%
+p.simulations.get_mesh("direct_wave_sim")
