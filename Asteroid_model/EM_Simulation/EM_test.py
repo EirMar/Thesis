@@ -22,6 +22,9 @@ mu = 1                  #
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
 f_max = 15.0e6          # Maximum frequency
+r_ring = 450
+ns = 1                  # Number of sources
+nr = 380                # Number of receivers
 
 # Import the model - Relative Permittivity values
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -69,18 +72,22 @@ else:
 wavelet = sn.simple_config.stf.Ricker(center_frequency=0.5*f_max)
 
 # Sources
-srcs = sn.simple_config.source.cartesian.ScalarPoint2D(
-    source_time_function=wavelet, x=0.0, y=450.0, f=1)
+srcs = sn.simple_config.source.cartesian.collections.ScalarPoint2DRing(
+    source_time_function = wavelet,  x=450.0, y=450.0, radius=r_ring, count=ns, f=1.0)
 
 # Receivers
 recs = sn.simple_config.receiver.cartesian.collections.RingPoint2D(
-    x=0, y=0, radius=450, count=380, fields=["phi"])
+    x=0, y=0, radius=r_ring, count=nr, fields=["phi"])
 
 p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
-# Boundaries Conditions
-num_absorbing_layers = 10
-absorbing_side_sets = ["x0", "x1", "y0", "y1"]
+# BOUNDARIES
+vp_min = v_radar.min()
+absorbing_par = sn.simple_mesh.basic_mesh.AbsorbingBoundaryParameters(
+    reference_velocity=vp_min,
+    number_of_wavelengths=6,
+    reference_frequency=0.5*f_max,
+    free_surface=False)
 
 mesh = toolbox.mesh_from_xarray(
     model_order=4,
@@ -99,7 +106,7 @@ wsc.physics.wave_equation.time_step_in_seconds = 1.0e-10
 
 ec = sn.EventConfiguration(
     waveform_simulation_configuration=wsc,
-    wavelet=sn.simple_config.stf.Ricker(center_frequency=20.0e6),
+    wavelet=wavelet,
 )
 
 p += sn.SimulationConfiguration(
@@ -107,6 +114,7 @@ p += sn.SimulationConfiguration(
     elements_per_wavelength=1.5,
     tensor_order=4,
     max_frequency_in_hertz=f_max,
+    absorbing_boundaries=absorbing_par,
     model_configuration=sn.ModelConfiguration(
         background_model=None, volume_models="true_model_EM"
     ),
@@ -141,5 +149,11 @@ true_data = p.waveforms.get(
 
 # %%
 true_data[0].plot(component="A", receiver_field="phi")
+
+# %%
+
+# Obtain the Snapshots
+p.simulations.get_simulation_output_directory(
+    simulation_configuration="true_model_new_EM", event=p.events.list()[0])
 
 # %%
