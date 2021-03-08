@@ -24,7 +24,7 @@ t_max = 3.0e-6              # Simulation time
 rho = 1000                  # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000         # Model size
 dt, dx = 1.0e-10, 1         # Time step, space step
-max_x, max_y = 500, 500     # Model extension
+max_x, max_y = 700, 700     # Model extension
 c = 3e8                     # speed of light
 mu = 1                      #
 f_max = 80.0e6              # Maximum frequency
