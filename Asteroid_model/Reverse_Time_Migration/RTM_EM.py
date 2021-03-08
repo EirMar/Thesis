@@ -77,7 +77,7 @@ p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 # Waveform Simulation Configuration
 wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=t_max)
-# wsc.physics.wave_equation.time_step_in_seconds = dt
+wsc.physics.wave_equation.time_step_in_seconds = dt
 
 # Event configuration
 ec = sn.EventConfiguration(
