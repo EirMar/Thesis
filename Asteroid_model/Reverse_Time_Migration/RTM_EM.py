@@ -1,15 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[1]:
-
-
-get_ipython().run_line_magic('matplotlib', 'inline')
-get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
-
-
-# In[2]:
-
+# %%
 import os
 import matplotlib.pyplot as plt
 from IPython import get_ipython
@@ -24,19 +15,19 @@ import utils as ut
 
 SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 
-
+# %%
 # Parameters
-ns = 1                  # Number of sources
-nr = 380                # Number of receivers
-r_ring = 450           # Satellite altitud
-t_max = 9.5e-5             # Simulation time
-rho = 1000              # Density, rho = 1000 kg/m**3
-nx, ny = 3000, 3000     # Model size
-dt, dx = 0.1, 1        # Time step, space step
-max_x, max_y = 500, 500   # Model extension
-c = 3e8                 # speed of light
-mu = 1                  #
-f_max = 15.0e6          # Maximum frequency
+ns = 1                      # Number of sources
+nr = 380                    # Number of receivers
+r_ring = 450                # Satellite altitud
+t_max = 9.5e-5              # Simulation time
+rho = 1000                  # Density, rho = 1000 kg/m**3
+nx, ny = 3000, 3000         # Model size
+dt, dx = 0.1, 1             # Time step, space step
+max_x, max_y = 500, 500     # Model extension
+c = 3e8                     # speed of light
+mu = 1                      #
+f_max = 15.0e6              # Maximum frequency
 
 # Load model
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -50,9 +41,10 @@ v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
 
 true_model = my_model(vp=v_radar, rho=rho_asteroid,
                       max_x=max_x, max_y=max_y)
-#true_model.vp.T.plot()
+# true_model.vp.T.plot()
 
 
+# %%
 # ------------------------------------------------------------------------------
 # CREATE NEW SALVUS PROJECT
 # ------------------------------------------------------------------------------
@@ -85,7 +77,7 @@ p += sn.EventCollection.from_sources(sources=srcs, receivers=recs)
 
 # Waveform Simulation Configuration
 wsc = sn.WaveformSimulationConfiguration(end_time_in_seconds=t_max)
-#wsc.physics.wave_equation.time_step_in_seconds = dt
+# wsc.physics.wave_equation.time_step_in_seconds = dt
 
 # Event configuration
 ec = sn.EventConfiguration(
@@ -132,6 +124,7 @@ p.add_to_project(
         unstructured_mesh=smooth_mesh,
         event_configuration=ec))
 
+# %%
 # ------------------------------------------------------------------------------
 # RUN FORWARD SIMULATION
 # ------------------------------------------------------------------------------
@@ -145,6 +138,7 @@ for sim, store in zip(["RTM_smooth_sim", "direct_wave_sim"], [True, False]):
         store_adjoint_checkpoints=True,
         wall_time_in_seconds_per_job=10000,)
 
+# %%
 for sim in ["RTM_smooth_sim", "direct_wave_sim"]:
     p.simulations.query(
         simulation_configuration=sim,
@@ -152,6 +146,8 @@ for sim in ["RTM_smooth_sim", "direct_wave_sim"]:
         verbosity=2,
         block=True,)
 
+
+# %%
 # ------------------------------------------------------------------------------
 # Compute adjoint sources and gradients
 # ------------------------------------------------------------------------------
@@ -185,6 +181,7 @@ while not misfits:
 
 print(misfits)
 
+# %%
 # ------------------------------------------------------------------------------
 # RUN ADJOINT SIMULATION
 # ------------------------------------------------------------------------------
@@ -197,6 +194,7 @@ p.simulations.launch_adjoint(
     wall_time_in_seconds_per_job=10000,
     verbosity=True,)
 
+# %%
 p.simulations.query(
     simulation_configuration="RTM_smooth_sim",
     events=p.events.list(),
@@ -205,11 +203,13 @@ p.simulations.query(
     verbosity=2,
     block=True,)
 
+# %%
 p.viz.nb.gradients(
     simulation_configuration="RTM_smooth_sim",
     misfit_configuration="migration",
     events=p.events.list(),)
 
+# %%
 gradient = p.actions.inversion.sum_gradients(
     simulation_configuration="RTM_smooth_sim",
     misfit_configuration="migration",
@@ -218,6 +218,7 @@ gradient = p.actions.inversion.sum_gradients(
 # gradient.write_h5("tot_gradient/gradient.h5")
 gradient
 
+# %%
 # ------------------------------------------------------------------------------
 # COLLECT WAVEFORM DATA
 # ------------------------------------------------------------------------------
@@ -226,10 +227,11 @@ fwd_data = p.waveforms.get(
 direct_wave = p.waveforms.get(
     data_name="direct_wave_sim", events=p.events.get_all())
 
-gather_full  = ut.get_gather(data=fwd_data, rcv_field="phi")
+gather_full = ut.get_gather(data=fwd_data, rcv_field="phi")
 gather_direct = ut.get_gather(data=direct_wave, rcv_field="phi")
 gather = gather_full - gather_direct     # Direct wave removal
 
+# %%
 # ------------------------------------------------------------------------------
 # PLOT SHOT GATHER
 # ------------------------------------------------------------------------------
@@ -256,6 +258,7 @@ ax[1].set_title("P direct")
 ax[2].set_title("P - direct wave removed")
 plt.savefig("shot.pdf")
 
+# %%
 ds = extract_model_to_regular_grid(
     mesh=gradient,
     ds=xr.Dataset(
@@ -265,6 +268,7 @@ ds = extract_model_to_regular_grid(
     verbose=True,
 )
 
+# %%
 RHO = ds.RHO.data
 ny_cut = 800
 nx_cut = 300
