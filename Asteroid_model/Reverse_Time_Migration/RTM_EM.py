@@ -20,14 +20,14 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 ns = 1                      # Number of sources
 nr = 380                    # Number of receivers
 r_ring = 450                # Satellite altitud
-t_max = 9.5e-5              # Simulation time
+t_max = 3.0e-6              # Simulation time
 rho = 1000                  # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000         # Model size
-dt, dx = 0.1, 1             # Time step, space step
+dt, dx = 1.0e-10, 1         # Time step, space step
 max_x, max_y = 500, 500     # Model extension
 c = 3e8                     # speed of light
 mu = 1                      #
-f_max = 15.0e6              # Maximum frequency
+f_max = 80.0e6              # Maximum frequency
 
 # Load model
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -40,7 +40,7 @@ v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
 
 
 true_model = my_model(vp=v_radar, rho=rho_asteroid,
-                      max_x=max_x, max_y=max_y)
+                      max_x=max_x, max_y=max_y, acoustic=False)
 # true_model.vp.T.plot()
 
 
@@ -111,8 +111,8 @@ p.add_to_project(
 smooth_mesh = p.actions.inversion.smooth_model(
     model=p.simulations.get_mesh("RTM_sim"),
     smoothing_configuration=sn.ConstantSmoothing(
-        smoothing_lengths_in_meters={"VP": 20.0,
-                                     "RHO": 20.0, }),
+        smoothing_lengths_in_meters={"VP": 1.875,
+                                     "RHO": 1.875, }),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=48,
     verbosity=2,
