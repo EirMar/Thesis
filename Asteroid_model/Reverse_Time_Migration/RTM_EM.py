@@ -29,10 +29,10 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 ns = 1                  # Number of sources
 nr = 380                # Number of receivers
 r_ring = 450           # Satellite altitud
-t_max = 9.5e-6             # Simulation time
+t_max = 9.5e-5             # Simulation time
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
-dt, dx = 1.0e-10, 1        # Time step, space step
+dt, dx = 0.1, 1        # Time step, space step
 max_x, max_y = 500, 500   # Model extension
 c = 3e8                 # speed of light
 mu = 1                  #
