@@ -25,17 +25,36 @@ f_max = 15.0e6          # Maximum frequency
 r_ring = 450
 ns = 1                  # Number of sources
 nr = 380                # Number of receivers
+e_light = 1             # Relative permittivity of speed of light
+e_rock = 6.795          # Relative permittivity of Rock
+e_regolith = 2.375      # Relative permittivity of Regolith
 
 # Import the model - Relative Permittivity values
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
                    sep='', offset=0)
 
+# Empty array
+array_em = np.zeros(nx*ny)
+array_em = array_em.reshape(nx,ny)
+
 eps_asteroid = data.reshape(nx, ny)                 # Velocity model
 rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
 mu_asteroid = np.full((nx, ny), 1, dtype=int)       # Magnetic Permeability
-v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
 
-plt.imshow(np.rot90(v_radar, 3))
+for i in range (nx):
+    for j in range (nx):
+        if eps_asteroid[i][j] >= 0.26 :
+            v_radar = eps_asteroid[i][j]*pow(10,9) / np.sqrt(mu * e_light)
+            array_em[i][j] = v_radar
+        elif eps_asteroid[i][j] < 0.26 and eps_asteroid[i][j] >= 0.19 :
+            v_radar = eps_asteroid[i][j]*pow(10,9) / np.sqrt(mu * e_rock)
+            array_em[i][j] = v_radar
+        else :
+            v_radar = eps_asteroid[i][j]*pow(10,9) / np.sqrt(mu * e_regolith)
+            array_em[i][j] = v_radar
+
+
+plt.imshow(np.rot90(array_em, 3),cm.get_cmap('gnuplot',30))
 plt.title('Asteroid model')
 plt.colorbar(orientation='vertical')
 plt.xlabel('x (m)')
