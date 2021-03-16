@@ -2,7 +2,6 @@
 # coding: utf-8
 # %%
 import os
-import matplotlib.pyplot as plt
 from IPython import get_ipython
 import numpy as np
 import pathlib
@@ -10,6 +9,9 @@ import pathlib
 from salvus.toolbox import toolbox
 from salvus.flow import simple_config as config
 import salvus.namespace as sn
+
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 from utils import my_model
 
@@ -21,13 +23,17 @@ c = 3e8                 # speed of light
 mu = 1                  #
 rho = 1000              # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000     # Model size
-f_max = 15.0e6          # Maximum frequency
+f_max = 10.0e6          # Maximum frequency
 r_ring = 450
 ns = 1                  # Number of sources
 nr = 380                # Number of receivers
 e_light = 1             # Relative permittivity of speed of light
 e_rock = 6.795          # Relative permittivity of Rock
 e_regolith = 2.375      # Relative permittivity of Regolith
+dt, dx = 5.0e-10, 1         # Time step, space step
+#max_x, max_y = 700, 700     # Model extension
+t_max = 9.5e-6
+
 
 # Import the model - Relative Permittivity values
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -58,21 +64,23 @@ plt.imshow(np.rot90(array_em, 3),cm.get_cmap('gnuplot',30))
 plt.title('Asteroid model')
 plt.colorbar(orientation='vertical')
 plt.xlabel('x (m)')
-plt.ylabel('y (m)')
+plt.ylabel('z (m)')
+plt.savefig('EM_model')
 plt.show()
 
 
 # %%
-true_model = my_model(vp=v_radar, rho=rho_asteroid, nx=nx, nz=ny)
+true_model = my_model(vp=array_em, rho=rho_asteroid,
+                      nx=nx, nz=ny)
 
-plt.figure(figsize=(16, 6))
-plt.subplot(121)
-plt.title("Asteroid model")
-true_model.vp.T.plot()
-plt.subplot(122)
-true_model.rho.T.plot()
-plt.suptitle("Asteroid model")
-plt.show()
+#plt.figure(figsize=(16, 6))
+#plt.subplot(121)
+#plt.title("Asteroid model")
+#true_model.vp.T.plot()
+#plt.subplot(122)
+#true_model.rho.T.plot()
+#plt.suptitle("Asteroid model")
+#plt.show()
 
 
 # %%
@@ -144,13 +152,19 @@ p += sn.SimulationConfiguration(
 
 # %%
 # Modeling
+# Modeling
 p.simulations.launch(
     simulation_configuration="true_model_new_EM",
     events=p.events.get_all(),
     site_name=SALVUS_FLOW_SITE_NAME,
     ranks_per_job=28,
-    wall_time_in_seconds_per_job=10,
-)
+    wall_time_in_seconds_per_job=10000,
+    extra_output_configuration={
+        "volume_data": {
+            "sampling_interval_in_time_steps": 500,
+            "fields": ["phi"]
+        }
+    })
 
 # %%
 p.simulations.query(block=True)
