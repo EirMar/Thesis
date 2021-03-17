@@ -20,14 +20,14 @@ SALVUS_FLOW_SITE_NAME = os.environ.get('SITE_NAME', 'eejit')
 ns = 1                      # Number of sources
 nr = 380                    # Number of receivers
 r_ring = 650                # Satellite altitud
-t_max = 3.5e-6              # Simulation time
+t_max = 9.0e-6              # Simulation time
 rho = 1000                  # Density, rho = 1000 kg/m**3
 nx, ny = 3000, 3000         # Model size
 dt, dx = 5.0e-10, 1         # Time step, space step
 max_x, max_y = 700, 700     # Model extension
 c = 3e8                     # speed of light
 mu = 1                      #
-f_max = 40.0e6              # Maximum frequency
+f_max = 20.0e6              # Maximum frequency
 
 # Load model
 data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
@@ -36,7 +36,7 @@ data = np.fromfile(file="../../vel1_copy.bin", dtype=np.float32, count=-1,
 eps_asteroid = data.reshape(nx, ny)                 # Velocity model
 rho_asteroid = np.full((nx, ny), rho, dtype=int)    # Density model
 mu_asteroid = np.full((nx, ny), 1, dtype=int)       # Magnetic Permeability
-v_radar = c / (mu * np.sqrt(eps_asteroid))          # Radar
+v_radar = c * eps_asteroid/eps_asteroid.max()        # Radar
 
 
 true_model = my_model(vp=v_radar, rho=rho_asteroid,
@@ -276,7 +276,7 @@ RHO = RHO[nx_cut:nx-nx_cut, ny_cut:ny-ny_cut]
 
 p_min, p_max = 0.1*RHO.min(), 0.1*RHO.max()
 ext = [-max_x, max_x, -max_y, max_y, ]
-x_lim, y_lim = [-4000, 3500], [-3800, 3000]
+x_lim, y_lim = [-700, 650], [-680, 600]
 
 plt.figure(figsize=(8, 6))
 plt.imshow(RHO.T, vmin=p_min, vmax=p_max, extent=ext,
